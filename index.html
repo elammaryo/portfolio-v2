@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en" class="intro-pending">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Omer Elammary</title>
+<meta name="description" content="Omer Elammary is a software engineer in Toronto building mobile apps, backends and the systems between them. Founding engineer of SuperOver, now at CMiC." />
+<meta name="theme-color" content="#07070c" />
+<link rel="canonical" href="https://omerelammary.com/" />
+<meta property="og:title" content="Omer Elammary — Software Engineer" />
+<meta property="og:description" content="2,062 commits, most of them after dark. Mobile apps, backends, and the systems between them." />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_CA" />
+<meta property="og:url" content="https://omerelammary.com/" />
+<meta property="og:image" content="https://omerelammary.com/og.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://omerelammary.com/og.jpg" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__label" id="cursorLabel"></span></div>
+
+<!-- ===== Nav ===== -->
+<header class="nav" id="nav">
+  <a href="#top" class="nav__mark" aria-label="Omer Elammary, back to top">
+    <span class="nav__mono">OE</span>
+  </a>
+  <nav class="nav__links" aria-label="Sections">
+    <a href="#work">Work</a>
+    <a href="#systems">Systems</a>
+    <a href="#journey">Journey</a>
+    <a href="#capabilities">Skills</a>
+    <a href="#about">About</a>
+  </nav>
+  <div class="nav__clock mono" title="Omer's local time">
+    <span class="dot" id="clockDot"></span>
+    <span>Toronto</span>
+    <span id="clockTime">--:--</span>
+    <span class="nav__status" id="clockStatus"></span>
+  </div>
+  <a href="#contact" class="nav__cta magnetic">Let’s talk</a>
+  <button type="button" class="nav__menu mono" id="navMenu" aria-expanded="false" aria-controls="mobileMenu">Menu</button>
+</header>
+<div class="mmenu" id="mobileMenu" hidden>
+  <nav class="mmenu__links" aria-label="Sections">
+    <a href="#work">Work</a>
+    <a href="#systems">Systems</a>
+    <a href="#journey">Journey</a>
+    <a href="#capabilities">Skills</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <p class="mmenu__foot mono">oa.elammary@gmail.com · Toronto</p>
+</div>
+
+<main id="top">
+  <!-- ===== Hero ===== -->
+  <section class="hero" id="hero" aria-labelledby="heroTitle">
+    <canvas class="hero__canvas" id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hud">
+      <div class="hud__frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <p class="hud__tr mono">
+        <span class="hud__live"><span class="pulse"></span>Last commit <span id="lastPush">—</span></span>
+        <span class="hud__muted"><span id="heroCount">2,062</span> commits · 12 repos</span>
+      </p>
+
+      <div class="hero__copy">
+        <p class="hero__who mono"><b>Omer Elammary</b> · Software engineer<span class="hero__where">, Toronto</span></p>
+        <div class="hero__lines">
+          <!-- The intro says hello first, then gives way to the headline (hero/index.ts). -->
+          <p class="hero__hello" id="heroHello" aria-hidden="true" hidden><em>Hey,</em> I'm Omer Elammary.</p>
+          <h1 class="hero__title" id="heroTitle">Turning caffeine <span class="hero__pair"><span class="hero__plus"><i>+</i></span>&nbsp;code</span> into <em>beautiful</em> applications.</h1>
+        </div>
+        <p class="hud__thesis">I build mobile apps, backends and the systems between them, often after midnight.</p>
+        <div class="hud__ctas">
+          <a class="btn btn--solid magnetic" href="#work">See the work</a>
+          <a class="btn magnetic" href="#contact">Say hello</a>
+        </div>
+      </div>
+
+      <!-- The WebGL scene fits the sculpture into this cell (hero/scene.ts); only the intro label lives in it. -->
+      <div class="hero__stage" aria-hidden="true">
+        <p class="hud__intro mono" id="heroIntroLabel">Oct 26, 2024 · first commit</p>
+      </div>
+
+      <div class="hud__switch">
+        <p class="mono hud__caption" id="shapeCaption" aria-live="polite">Caffeine</p>
+        <div class="hud__chips" role="group" aria-label="Reshape the particles">
+          <button type="button" class="chip is-active" data-shape="caffeine" aria-pressed="true">Caffeine</button>
+          <button type="button" class="chip" data-shape="apps" aria-pressed="false">Apps</button>
+          <button type="button" class="chip" data-shape="systems" aria-pressed="false">Systems</button>
+          <button type="button" class="chip" data-shape="me" aria-pressed="false">Me</button>
+        </div>
+        <p class="hud__hint mono" id="heroHint">stir the steam · click Caffeine again for iced</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Stats ===== -->
+  <section class="stats wrap" id="stats" aria-label="By the numbers">
+    <div class="stat">
+      <span class="stat__num" data-count="2062">2,062</span>
+      <span class="stat__label">commits across 12 repos since Oct 2024</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="36" data-suffix="%">36%</span>
+      <span class="stat__label">of them pushed between 10 PM and 5 AM</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="4">4</span>
+      <span class="stat__label">products live, on the App Store and the web</span>
+    </div>
+    <div class="stat">
+      <span class="stat__num" data-count="3" data-suffix="+">3+</span>
+      <span class="stat__label">years shipping production software</span>
+    </div>
+  </section>
+
+  <!-- ===== Marquee ===== -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee__track">
+      <span>Flutter</span><i>✦</i><span>TypeScript</span><i>✦</i><span>Node.js</span><i>✦</i><span>Firebase</span><i>✦</i><span>Next.js</span><i>✦</i><span>Go</span><i>✦</i><span>Postgres</span><i>✦</i><span>Stripe</span><i>✦</i><span>React</span><i>✦</i><span>GCP</span><i>✦</i><span>Claude API</span><i>✦</i>
+      <span>Flutter</span><i>✦</i><span>TypeScript</span><i>✦</i><span>Node.js</span><i>✦</i><span>Firebase</span><i>✦</i><span>Next.js</span><i>✦</i><span>Go</span><i>✦</i><span>Postgres</span><i>✦</i><span>Stripe</span><i>✦</i><span>React</span><i>✦</i><span>GCP</span><i>✦</i><span>Claude API</span><i>✦</i>
+    </div>
+  </div>
+
+  <!-- ===== Work ===== -->
+  <section class="work" id="work">
+    <div class="wrap section-head">
+      <p class="eyebrow mono">Selected work · 2025 – now</p>
+      <h2 class="section-title reveal-title">Things I’ve <em>shipped</em>.</h2>
+      <p class="section-sub">A cricket app on the App Store, a soccer booking platform, an AI assistant I talk to every morning, a home for my beats, and a budget that actually talks to my bank.</p>
+    </div>
+
+    <div class="projects">
+      <!-- SuperOver -->
+      <article class="project" style="--pc:#06BA63;--pc2:#0b3d25" data-cursor="View">
+        <div class="project__card">
+          <div class="project__info">
+            <div class="project__top mono"><span>Founding engineer</span><span>Apr 2025 – Apr 2026</span></div>
+            <h3 class="project__name">SuperOver</h3>
+            <p class="project__pitch">Pickup cricket for the GTA, booked in a tap.</p>
+            <p class="project__desc">I architected and built the whole platform: a Flutter app for iOS and Android, a Firebase Functions API, the marketing site and the admin tools. Players find a game near them, pay with Apple Pay, and chat with their team before the first ball.</p>
+            <ul class="project__bullets">
+              <li>Stripe payments, confirmed by signed webhooks before a player joins a game</li>
+              <li>Real-time game chat with push notifications that deep-link into the right screen</li>
+              <li>A host program with slot claims, reminders on Cloud Tasks and post-game ratings</li>
+              <li>GitHub Actions pipelines shipping builds to TestFlight and Google Play</li>
+            </ul>
+            <div class="project__stack mono"><span>Flutter</span><span>Firebase</span><span>Node / Express</span><span>Stripe</span><span>GCP</span></div>
+            <div class="project__links">
+              <a class="btn btn--solid magnetic" href="https://apps.apple.com/ca/app/superover/id6758922861" target="_blank" rel="noopener">App Store ↗</a>
+              <a class="btn magnetic" href="https://superoverapp.com" target="_blank" rel="noopener">superoverapp.com ↗</a>
+              <a class="btn btn--flow magnetic" href="#systems" data-flow="superover">How it works ↓</a>
+            </div>
+          </div>
+          <div class="project__art art-superover">
+            <div class="so-glow"></div>
+            <div class="so-pitch"></div>
+            <div class="phone phone--a tilt"><img src="img/so-1.webp" alt="SuperOver app showing upcoming cricket games with join buttons" loading="lazy" width="447" height="900" /></div>
+            <div class="phone phone--b tilt"><img src="img/so-2.webp" alt="SuperOver game details screen with a 12 of 14 players joined ring" loading="lazy" width="447" height="900" /></div>
+            <div class="so-chip so-chip--1 mono">● 12/14 joined</div>
+            <div class="so-chip so-chip--2 mono">Payment confirmed ✓</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- GameDay -->
+      <article class="project" style="--pc:#E0334F;--pc2:#3a0f16" data-cursor="View">
+        <div class="project__card">
+          <div class="project__info">
+            <div class="project__top mono"><span>Independent venture</span><span>2026</span></div>
+            <h3 class="project__name">GameDay</h3>
+            <p class="project__pitch">See you on the pitch.</p>
+            <p class="project__desc">Drop-in pickup soccer in the GTA. I built the booking site and the admin dashboard behind it, from finding a session to paying for it to working out whether a venue will break even.</p>
+            <ul class="project__bullets">
+              <li>Interac e-transfers matched to bookings automatically by reading the payments inbox</li>
+              <li>Book without an account through a private link, with holds that expire on their own</li>
+              <li>Admin tools for venues, check-in, finances and a break-even calculator</li>
+              <li>580+ tests, with CI running migrations and a production build against a real Postgres</li>
+            </ul>
+            <div class="project__stack mono"><span>Next.js 16</span><span>Postgres / Drizzle</span><span>Stripe</span><span>Resend</span><span>Vercel</span></div>
+            <div class="project__links">
+              <a class="btn btn--solid magnetic" href="https://gamedaygta.com" target="_blank" rel="noopener">gamedaygta.com ↗</a>
+              <a class="btn btn--flow magnetic" href="#systems" data-flow="gameday">How it works ↓</a>
+            </div>
+          </div>
+          <div class="project__art art-gameday">
+            <!-- the pitch is a canvas drawn by src/eggs/gameday.ts, and it's playable -->
+            <div class="gd-ticket">
+              <span class="mono gd-ticket__k">Thu · 8:00 PM</span>
+              <strong>7v7 Pickup</strong>
+              <span class="gd-ticket__bar"><i></i></span>
+              <span class="mono gd-ticket__k">11 of 14 spots · $12</span>
+            </div>
+            <div class="gd-etransfer mono">e-transfer GD-4K7Q matched ✓</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Athena -->
+      <article class="project" style="--pc:#B9A6FF;--pc2:#1d1540" data-cursor="View">
+        <div class="project__card">
+          <div class="project__info">
+            <div class="project__top mono"><span>Personal AI · in daily use</span><span>2026</span></div>
+            <h3 class="project__name">Athena</h3>
+            <p class="project__pitch">My own Jarvis, and getting closer every week.</p>
+            <p class="project__desc">Athena is an assistant I hand things to. I tell her what's going on in plain words, typed or spoken through a Siri Shortcut, and she keeps track of all of it: plans, promises, goals. She runs my day in sentences, not lists: a brief at 6 AM, a nudge when a real gap opens, and a 30-second recap at night. Next, she learns to take a whole task and finish it on her own, like researching something and reporting back.</p>
+            <ul class="project__bullets">
+              <li>One message, sorted: an appointment goes on the calendar, a promise to someone gets a reminder, a goal gets a first step</li>
+              <li>Nudges when a real window opens in the day, not on a timer, with a daily limit so she never nags</li>
+              <li>Writes emails for me and sends them only after I say yes</li>
+              <li>A recap each night and a ten-minute plan every Sunday: what moved, what slipped, and this week's three focuses</li>
+            </ul>
+            <div class="project__stack mono"><span>TypeScript</span><span>Fastify</span><span>Postgres</span><span>Claude API</span><span>PWA</span></div>
+            <div class="project__links"><a class="btn btn--flow magnetic" href="#systems" data-flow="athena">How it works ↓</a><span class="btn btn--ghost mono">Private build</span></div>
+          </div>
+          <div class="project__art art-athena">
+            <div class="at-orb"></div>
+            <img class="at-owl" src="img/athena-owl.svg" alt="" aria-hidden="true" />
+            <!-- One thing she does that a phone's reminders can't: one message, sorted into where
+                 each part belongs. Example data (the app is private); "Hand her another" plays
+                 the next example (eggs/athena.ts). Without JS it stays as written here. -->
+            <div class="at-card">
+              <p class="at-msg"><mark class="k-cal">Dentist Tuesday at 3</mark>, <mark class="k-promise">send Sam the deck by Friday</mark>, and <mark class="k-goal">I want to start running</mark>.</p>
+              <p class="at-says">Got all three. Here’s where each one went:</p>
+              <ul class="at-sorted">
+                <li class="k-cal"><i class="at-ico" aria-hidden="true"></i><span><span class="at-kind mono">Calendar</span><b>Dentist</b><small>Tue 3:00 PM · I’ll tell you when to leave</small></span></li>
+                <li class="k-promise"><i class="at-ico" aria-hidden="true"></i><span><span class="at-kind mono">Promise to Sam</span><b>The deck</b><small>Due Friday · a nudge Thursday night if it’s still open</small></span></li>
+                <li class="k-goal"><i class="at-ico" aria-hidden="true"></i><span><span class="at-kind mono">New goal</span><b>Start running</b><small>First step: a 20-minute run on Saturday</small></span></li>
+              </ul>
+              <div class="at-foot"><button type="button" class="at-again">Hand her another <span aria-hidden="true">↻</span></button><span class="mono">An example · the app is private</span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- GameOver -->
+      <article class="project" style="--pc:#3DD6F5;--pc2:#2a0f33" data-cursor="Listen">
+        <div class="project__card">
+          <div class="project__info">
+            <div class="project__top mono"><span>Music platform · personal</span><span>Nov 2025 – now</span></div>
+            <h3 class="project__name">GameOver <em>Studio</em></h3>
+            <p class="project__pitch">A home for my beats, built with the same care as the music.</p>
+            <p class="project__desc">My music catalogue with a custom audio player that keeps playing as you move between pages, Spotify sign-in and playback, and audio served from S3 through signed links that expire after an hour.</p>
+            <ul class="project__bullets">
+              <li>A player built on the HTML5 Audio API with a queue and a persistent now-playing bar</li>
+              <li>Spotify sign-in with the client secret kept on the server, tokens in HttpOnly cookies, in-browser playback</li>
+              <li>A WebGL aurora shader behind everything</li>
+            </ul>
+            <div class="project__stack mono"><span>Next.js 16</span><span>TypeScript</span><span>AWS S3</span><span>Spotify API</span><span>WebGL</span></div>
+            <div class="project__links">
+              <a class="btn btn--solid magnetic" href="https://gameover.studio" target="_blank" rel="noopener">gameover.studio ↗</a>
+              <a class="btn magnetic" href="https://github.com/elammaryo/gameover" target="_blank" rel="noopener">Source ↗</a>
+            </div>
+          </div>
+          <div class="project__art art-gameover">
+            <div class="go-aurora"></div>
+            <img class="go-logo" src="img/gameover-icon.svg" alt="" aria-hidden="true" />
+            <div class="go-wave" id="goWave" aria-hidden="true"></div>
+            <div class="go-player mono"><span class="go-play">▶</span><span>Now playing · Next Level Beats</span><span class="go-time">1:24</span></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Budget -->
+      <article class="project" style="--pc:#F2C879;--pc2:#2b2410" data-cursor="View">
+        <div class="project__card">
+          <div class="project__info">
+            <div class="project__top mono"><span>Personal finance · private</span><span>2026</span></div>
+            <h3 class="project__name">Budget</h3>
+            <p class="project__pitch">A household budget that talks to the bank.</p>
+            <p class="project__desc">Bank accounts sync through Plaid and new transactions tidy themselves up: messy card-processor names become real merchants, rules file them into categories, and transfers, refunds and subscriptions are spotted on their own. Around that: budgets with a safe-to-spend number, savings goals with honest timelines, shared bills with the household, and a forecast of the months ahead.</p>
+            <ul class="project__bullets">
+              <li>Shared expenses: split bills, see who's paid, settle up, and invite people with a link</li>
+              <li>Budgets, savings goals and a month-by-month forecast with confidence bands, computed in SQL</li>
+              <li>Postgres row-level security as the real privacy boundary, with money kept in integer cents</li>
+            </ul>
+            <div class="project__stack mono"><span>React 19</span><span>Supabase</span><span>Plaid</span><span>Edge Functions</span><span>SQL</span></div>
+            <div class="project__links"><a class="btn btn--flow magnetic" href="#systems" data-flow="budget">How it works ↓</a><span class="btn btn--ghost mono">Private build</span></div>
+          </div>
+          <div class="project__art art-budget">
+            <svg class="bd-chart" viewBox="0 0 400 240" preserveAspectRatio="none" aria-hidden="true">
+              <path class="bd-band" d="M0,170 C60,160 100,150 150,140 C200,128 250,95 300,80 C340,68 370,50 400,40 L400,110 C370,115 340,122 300,128 C250,136 200,150 150,158 C100,166 60,175 0,180 Z" />
+              <path class="bd-line" d="M0,175 C60,168 100,158 150,149 C200,139 250,116 300,104 C340,95 370,82 400,75" />
+              <line class="bd-now" x1="150" y1="20" x2="150" y2="230" />
+            </svg>
+            <div class="bd-card">
+              <span class="mono bd-k">Projected · Dec</span>
+              <strong class="bd-v">+$4,820</strong>
+              <span class="mono bd-k">range $3.9k – $5.6k</span>
+            </div>
+            <div class="bd-inbox">
+              <div class="bd-inbox__head"><span class="mono">Inbox · bank feed</span><button type="button" class="bd-sync mono">↻ Sync bank</button></div>
+              <ol class="bd-rows" aria-live="polite"><li class="bd-empty">All caught up. Sync to pull in new transactions.</li></ol>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="wrap more">
+      <p class="eyebrow mono">Also built</p>
+      <div class="more__grid">
+        <a class="mini magnetic-soft" href="https://github.com/elammaryo/ai-chatbot" target="_blank" rel="noopener">
+          <span class="mini__name">GlazeBot</span>
+          <span class="mini__desc">An AI guide to my work, grounded in facts I approved, behind an Express proxy that keeps keys server-side.</span>
+          <span class="mono mini__tag">Node · OpenAI · Express ↗</span>
+        </a>
+        <a class="mini magnetic-soft" href="https://github.com/elammaryo/gyo-self-order" target="_blank" rel="noopener">
+          <span class="mini__name">GYO Kiosk</span>
+          <span class="mini__desc">A white-label self-order kiosk for fast-food spots, with swappable restaurant themes and a full cart flow.</span>
+          <span class="mono mini__tag">Flutter · Provider ↗</span>
+        </a>
+        <a class="mini magnetic-soft" href="https://github.com/elammaryo" target="_blank" rel="noopener">
+          <span class="mini__name">More on GitHub</span>
+          <span class="mini__desc">Experiments, prototypes and the code behind the public projects.</span>
+          <span class="mono mini__tag">github.com/elammaryo ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Systems ===== -->
+  <section class="systems" id="systems">
+    <div class="wrap section-head">
+      <p class="eyebrow mono">Under the hood · traced from the code</p>
+      <h2 class="section-title reveal-title">How it <em>actually</em> works.</h2>
+      <p class="section-sub">Pick a system and follow one real request through it, hop by hop. Every step comes from the code, down to the file it lives in.</p>
+    </div>
+    <div class="wrap">
+      <div class="sys__tabs" id="sysTabs" role="tablist" aria-label="Choose a system"></div>
+      <div class="sys__stage">
+        <div class="sys__main">
+        <div class="sys__diagram">
+          <div class="sys__guards" id="sysGuards" aria-label="Safeguards on this path"></div>
+          <svg id="sysSvg" role="img" aria-label="Animated system diagram of the selected request path"></svg>
+          <div class="sys__legend mono" aria-hidden="true">
+            <span style="--kc:#9d8cff">App</span><span style="--kc:#ffb36b">Server</span><span style="--kc:#6fd6ff">Data</span><span style="--kc:#d9d5ea">Service</span><span style="--kc:#ff8fb1">Scheduled</span><span class="lg-x">Failure handled</span>
+          </div>
+          <button type="button" class="sys__play mono" id="sysPlay" aria-pressed="false">Pause</button>
+        </div>
+        <div class="sys__stats" id="sysStats"></div>
+        </div>
+        <aside class="sys__panel">
+          <p class="sys__flowtitle mono" id="sysFlowTitle"></p>
+          <div class="sys__step" id="sysStep" aria-live="polite"></div>
+          <ol class="sys__list" id="sysList"></ol>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Rhythm ===== -->
+  <section class="rhythm-section" id="rhythm" aria-label="When I ship">
+    <div class="wrap rhythm">
+      <div class="rhythm__clock">
+        <p class="eyebrow mono">When I ship</p>
+        <h3 class="rhythm__title">Peak hours: <em>5 PM</em>, and again at <em>3 AM</em>.</h3>
+        <p class="rhythm__sub">Commits by hour of day, in Toronto time. The shaded arc runs from 10 PM to 5 AM.</p>
+        <svg id="clock" viewBox="0 0 320 320" role="img" aria-label="Radial chart of commits by hour of day"></svg>
+      </div>
+      <div class="rhythm__side">
+        <div class="facts">
+          <div class="fact"><span class="fact__v" id="factStreak">19</span><span class="fact__k mono">day streak, best run</span></div>
+          <div class="fact"><span class="fact__v" id="factBusiest">59</span><span class="fact__k mono" id="factBusiestK">commits on my busiest day</span></div>
+          <div class="fact"><span class="fact__v" id="factDays">227</span><span class="fact__k mono">days with at least one push</span></div>
+        </div>
+        <div class="langs">
+          <p class="eyebrow mono">What these commits were built with</p>
+          <div id="langs"></div>
+          <p class="langs__note mono">Commits in repos built on each. A repo counts toward every framework it uses.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap heat">
+      <div class="heat__head">
+        <p class="eyebrow mono">Contribution calendar</p>
+        <div class="heat__scale mono">less <i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i> more</div>
+      </div>
+      <p class="heat__note">My own projects and SuperOver. Day-job code at Skinopathy and CMiC lives in their private repos, so it isn't counted here.</p>
+      <div class="heat__scroll"><svg id="heatmap" role="img" aria-label="Calendar heatmap of daily commits"></svg></div>
+    </div>
+
+    <div class="ticker" aria-label="Recent commit messages">
+      <div class="ticker__track mono" id="ticker"></div>
+    </div>
+  </section>
+
+  <!-- ===== Journey ===== -->
+  <section class="journey" id="journey">
+    <div class="wrap">
+      <div class="journey__head">
+        <p class="eyebrow mono">The journey so far</p>
+        <h2 class="section-title reveal-title">Where I’ve <em>built</em>.</h2>
+      </div>
+
+      <!-- A map of the roles below at their real dates, overlaps included (main.ts, drawCareer). -->
+      <div class="career" id="career" aria-hidden="true"></div>
+
+      <ol class="roles">
+        <li class="role role--now" data-role="cmic" data-from="2026-04" data-lane="0" data-label="CMiC" style="--c:#ffb36b">
+          <p class="role__when mono"><span class="pulse"></span>Apr 2026 – now</p>
+          <div class="role__who">
+            <h3 class="role__org">CMiC</h3>
+            <p class="role__title">Software Engineer</p>
+            <p class="role__meta mono">Construction ERP</p>
+          </div>
+          <div class="role__what">
+            <p>Flutter front ends for construction project management, inside an enterprise ERP platform.</p>
+            <ul><li>Building project management screens in Flutter, on a codebase that keeps its local data in Drift</li></ul>
+            <p class="role__after">After hours: GameDay, Athena and whatever the next idea is.</p>
+            <div class="role__stack mono"><span>Flutter</span><span>Dart</span><span>Drift</span></div>
+          </div>
+        </li>
+        <li class="role" data-role="superover" data-from="2025-04" data-to="2026-04" data-lane="1" data-label="SuperOver" style="--c:#1fd17a">
+          <p class="role__when mono">Apr 2025 – Apr 2026</p>
+          <div class="role__who">
+            <h3 class="role__org">SuperOver</h3>
+            <p class="role__title">Founding Software Engineer</p>
+            <p class="role__meta mono">Pickup cricket · GTA</p>
+          </div>
+          <div class="role__what">
+            <p>Built the platform end to end: the Flutter app, the Node and TypeScript backend, and the React admin dashboard for venues, games and players.</p>
+            <ul>
+              <li>Designed the Firestore schema and APIs for games, bookings, venues and real-time chat</li>
+              <li>Stripe payments with verified webhooks, so a player joins a game only once payment is confirmed</li>
+              <li>Shipped to the App Store and Google Play, with GitHub Actions building every TestFlight and Android release</li>
+            </ul>
+            <div class="role__stack mono"><span>Flutter</span><span>Firebase</span><span>Node.js</span><span>React</span><span>Stripe</span></div>
+          </div>
+        </li>
+        <li class="role" data-role="skinopathy" style="--c:#8fd3ff">
+          <p class="role__when mono">Jan 2023 – May 2025</p>
+          <div class="role__who">
+            <h3 class="role__org">Skinopathy</h3>
+            <p class="role__title">Intern, then Software Engineer</p>
+            <p class="role__meta mono">HealthTech startup</p>
+          </div>
+          <div class="role__what">
+            <div class="role__stint" data-from="2024-01" data-to="2025-05" data-lane="0" data-label="Skinopathy">
+              <p class="role__sub">Software Engineer <span class="mono">Jan 2024 – May 2025</span></p>
+              <ul>
+                <li>Go APIs for rescheduling and cancelling appointments, from request validation to the Flutter screens</li>
+                <li>Health card verification with expiry tracking and renewal reminders</li>
+                <li>An AI skin assessment flow and a multi-step medical questionnaire with conditional questions</li>
+              </ul>
+              <div class="role__stack mono"><span>Flutter</span><span>Go</span><span>Docker</span></div>
+            </div>
+            <div class="role__stint" data-from="2023-01" data-to="2023-12" data-lane="0" data-label="Skinopathy intern">
+              <p class="role__sub">Software Engineer Intern <span class="mono">Jan – Dec 2023</span></p>
+              <ul>
+                <li>Production features in Flutter: a booking system, a food journal and the first clinical questionnaire</li>
+                <li>Code reviews and sprint cycles from week one</li>
+              </ul>
+            </div>
+          </div>
+        </li>
+        <li class="role role--edu" data-role="york" data-at="2024" style="--c:#c9b8ff">
+          <p class="role__when mono">2024</p>
+          <div class="role__who">
+            <h3 class="role__org">York University</h3>
+            <p class="role__title">B.Sc. Computer Science</p>
+          </div>
+          <div class="role__what"><p>Finished my degree while working as a software engineer at Skinopathy.</p></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ===== Capabilities ===== -->
+  <section class="caps" id="capabilities">
+    <div class="wrap section-head">
+      <p class="eyebrow mono">Capabilities · and where each one shipped</p>
+      <h2 class="section-title reveal-title">From first pixel to <em>cloud</em>.</h2>
+      <p class="section-sub">Each lit dot is something I built and shipped. Point at a dot or a row to see what it was.</p>
+    </div>
+    <div class="wrap caps__grid">
+      <div class="caps__scroll"><div class="caps__matrix" id="capsMatrix"></div></div>
+      <aside class="caps__detail" id="capsDetail" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <!-- ===== About ===== -->
+  <section class="about wrap" id="about">
+    <figure class="about__photo tilt-soft">
+      <img src="img/profile.webp" alt="Omer Elammary in Florence at sunset" loading="lazy" width="874" height="900" />
+      <figcaption class="mono">Florence, golden hour</figcaption>
+    </figure>
+    <div class="about__copy">
+      <p class="eyebrow mono">About</p>
+      <h2 class="about__title reveal-title">I’m most alive when an idea turns into something <em>real</em>.</h2>
+      <p>I’m Omer, a software engineer in Toronto who loves building things. Mobile apps, backend systems, or a side project that started as “just a quick idea”: I want to take it from the first pixel to the cloud.</p>
+      <p>My work has taken me from healthtech to founding engineer at SuperOver. Now I’m at CMiC, building Flutter apps for construction project management. Outside work I make beats as GameOver and keep building tools for the pickup-sports communities I play in.</p>
+      <div class="about__links">
+        <a class="btn btn--solid magnetic" href="documents/Omer_Elammary_Resume.pdf" target="_blank" rel="noopener">Resume (PDF) ↗</a>
+        <a class="btn magnetic" href="#contact">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section class="contact" id="contact">
+    <div class="contact__marquee" aria-hidden="true">
+      <div class="contact__track"><span>Let’s build something</span><i>✦</i><span>Let’s build something</span><i>✦</i><span>Let’s build something</span><i>✦</i></div>
+    </div>
+    <div class="wrap contact__body">
+      <h2 class="contact__title">Have an idea, a role, or a game that needs one more player?</h2>
+      <div class="contact__email">
+        <span class="mono contact__k">Email</span>
+        <span class="contact__addr" id="emailAddr">oa.elammary@gmail.com</span>
+        <button class="btn btn--solid magnetic" id="copyEmail" type="button">Copy</button>
+      </div>
+      <ul class="contact__socials">
+        <li><a href="https://linkedin.com/in/omerelammary" target="_blank" rel="noopener" class="social"><span>LinkedIn</span><span class="mono">Connect professionally ↗</span></a></li>
+        <li><a href="https://github.com/elammaryo" target="_blank" rel="noopener" class="social"><span>GitHub</span><span class="mono">See the source ↗</span></a></li>
+        <li><a href="https://www.instagram.com/omer.el__" target="_blank" rel="noopener" class="social"><span>Instagram</span><span class="mono">Follow along ↗</span></a></li>
+      </ul>
+    </div>
+    <footer class="footer wrap mono">
+      <span>© 2026 Omer Elammary</span>
+      <span id="lastCommit">Last commit: Sep 29, 2026</span>
+      <a href="#top">Back to top ↑</a>
+    </footer>
+  </section>
+</main>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
