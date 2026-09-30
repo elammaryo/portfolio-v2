@@ -3,20 +3,119 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Omer Elammary</title>
-<meta name="description" content="Omer Elammary is a software engineer in Toronto building mobile apps, backends and the systems between them. Founding engineer of SuperOver, now at CMiC." />
+<!-- SEO: the name leads the title, the description and the h1, so a search for him lands
+     here; the JSON-LD below tells search engines this page is his profile (README, "Search"). -->
+<title>Omer Elammary · Software Engineer in Toronto</title>
+<meta name="description" content="Omer Elammary, a Toronto software engineer building Flutter apps, TypeScript backends and the systems between them. Founding engineer of SuperOver, now at CMiC." />
+<meta name="author" content="Omer Elammary" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
 <meta name="theme-color" content="#07070c" />
 <link rel="canonical" href="https://omerelammary.com/" />
-<meta property="og:title" content="Omer Elammary — Software Engineer" />
+<link rel="manifest" href="site.webmanifest" />
+<meta property="og:site_name" content="Omer Elammary" />
+<meta property="og:title" content="Omer Elammary · Software Engineer in Toronto" />
 <meta property="og:description" content="2,062 commits, most of them after dark. Mobile apps, backends, and the systems between them." />
-<meta property="og:type" content="website" />
+<meta property="og:type" content="profile" />
+<meta property="profile:first_name" content="Omer" />
+<meta property="profile:last_name" content="Elammary" />
 <meta property="og:locale" content="en_CA" />
 <meta property="og:url" content="https://omerelammary.com/" />
 <meta property="og:image" content="https://omerelammary.com/og.jpg" />
+<meta property="og:image:type" content="image/jpeg" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Omer Elammary in glowing particles. Software engineer, Toronto." />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Omer Elammary · Software Engineer in Toronto" />
+<meta name="twitter:description" content="2,062 commits, most of them after dark. Mobile apps, backends, and the systems between them." />
 <meta name="twitter:image" content="https://omerelammary.com/og.jpg" />
+<meta name="twitter:image:alt" content="Omer Elammary in glowing particles. Software engineer, Toronto." />
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "WebSite",
+   "@id": "https://omerelammary.com/#website",
+   "url": "https://omerelammary.com/",
+   "name": "Omer Elammary",
+   "inLanguage": "en-CA",
+   "publisher": {
+    "@id": "https://omerelammary.com/#omer"
+   }
+  },
+  {
+   "@type": "ProfilePage",
+   "@id": "https://omerelammary.com/#profile",
+   "url": "https://omerelammary.com/",
+   "name": "Omer Elammary · Software Engineer in Toronto",
+   "description": "Omer Elammary, a Toronto software engineer building Flutter apps, TypeScript backends and the systems between them. Founding engineer of SuperOver, now at CMiC.",
+   "inLanguage": "en-CA",
+   "isPartOf": {
+    "@id": "https://omerelammary.com/#website"
+   },
+   "mainEntity": {
+    "@id": "https://omerelammary.com/#omer"
+   },
+   "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "url": "https://omerelammary.com/og.jpg",
+    "width": 1200,
+    "height": 630
+   },
+   "dateModified": "2026-09-30"
+  },
+  {
+   "@type": "Person",
+   "@id": "https://omerelammary.com/#omer",
+   "name": "Omer Elammary",
+   "url": "https://omerelammary.com/",
+   "image": "https://omerelammary.com/img/profile.webp",
+   "description": "Software engineer in Toronto building mobile apps, backends and the systems between them.",
+   "jobTitle": "Software Engineer",
+   "worksFor": {
+    "@type": "Organization",
+    "name": "CMiC"
+   },
+   "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "York University"
+   },
+   "homeLocation": {
+    "@type": "Place",
+    "address": {
+     "@type": "PostalAddress",
+     "addressLocality": "Toronto",
+     "addressRegion": "ON",
+     "addressCountry": "CA"
+    }
+   },
+   "knowsAbout": [
+    "Flutter",
+    "Dart",
+    "TypeScript",
+    "Node.js",
+    "Firebase",
+    "React",
+    "Next.js",
+    "PostgreSQL",
+    "Go",
+    "Stripe",
+    "Google Cloud",
+    "three.js",
+    "WebGL",
+    "Mobile app development",
+    "Backend development"
+   ],
+   "sameAs": [
+    "https://github.com/elammaryo",
+    "https://www.linkedin.com/in/omerelammary",
+    "https://www.instagram.com/omer.el__"
+   ]
+  }
+ ]
+}
+</script>
 <!-- The OE monogram in the site's two accents. The .ico is for browsers without SVG
      icons; iOS rounds the square touch icon itself. -->
     <link rel="icon" href="favicon.ico" sizes="32x32" />
@@ -72,11 +171,11 @@
       </p>
 
       <div class="hero__copy">
-        <p class="hero__who mono"><b>Omer Elammary</b> · Software engineer<span class="hero__where">, Toronto</span></p>
+        <h1 class="hero__who mono"><b>Omer Elammary</b> · Software engineer<span class="hero__where">, Toronto</span></h1>
         <div class="hero__lines">
           <!-- The intro says hello first, then gives way to the headline (hero/index.ts). -->
           <p class="hero__hello" id="heroHello" aria-hidden="true" hidden><em>Hey,</em> I'm Omer Elammary.</p>
-          <h1 class="hero__title" id="heroTitle">Turning caffeine <span class="hero__pair"><span class="hero__plus"><i>+</i></span>&nbsp;code</span> into <em>beautiful</em> applications.</h1>
+          <h2 class="hero__title" id="heroTitle">Turning caffeine <span class="hero__pair"><span class="hero__plus"><i>+</i></span>&nbsp;code</span> into <em>beautiful</em> applications.</h2>
         </div>
         <p class="hud__thesis">I build mobile apps, backends and the systems between them, often after midnight.</p>
         <div class="hud__ctas">
@@ -224,7 +323,7 @@
           </div>
           <div class="project__art art-athena">
             <div class="at-orb"></div>
-            <img class="at-owl" src="img/athena-owl.svg" alt="" aria-hidden="true" />
+            <img class="at-owl" src="img/athena-owl.svg" alt="" aria-hidden="true" width="52" height="52" />
             <!-- One thing she does that a phone's reminders can't: one message, sorted into where
                  each part belongs. Example data (the app is private); "Hand her another" plays
                  the next example (eggs/athena.ts). Without JS it stays as written here. -->
@@ -263,7 +362,7 @@
           </div>
           <div class="project__art art-gameover">
             <div class="go-aurora"></div>
-            <img class="go-logo" src="img/gameover-icon.svg" alt="" aria-hidden="true" />
+            <img class="go-logo" src="img/gameover-icon.svg" alt="" aria-hidden="true" width="110" height="110" />
             <div class="go-wave" id="goWave" aria-hidden="true"></div>
             <div class="go-player mono"><span class="go-play">▶</span><span>Now playing · Next Level Beats</span><span class="go-time">1:24</span></div>
           </div>

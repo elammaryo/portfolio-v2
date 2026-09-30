@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- One page and the resume. Bump lastmod when the page's content changes (README, "Search"). -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://omerelammary.com/</loc>
+    <lastmod>2026-09-30</lastmod>
+  </url>
+  <url>
+    <loc>https://omerelammary.com/documents/Omer_Elammary_Resume.pdf</loc>
+    <lastmod>2026-09-30</lastmod>
+  </url>
+</urlset>

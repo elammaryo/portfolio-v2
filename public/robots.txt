@@ -1,0 +1,5 @@
+# Everything on omerelammary.com is public and meant to be found.
+User-agent: *
+Allow: /
+
+Sitemap: https://omerelammary.com/sitemap.xml

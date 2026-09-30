@@ -182,6 +182,26 @@ what was actually built there; edit `ROWS` to add or change evidence. The first-
 is a CSS animation on `scale` (a GSAP stagger on `transform` fought the hover transition
 and left dots invisible), and dots stay visible if the reveal never runs.
 
+## Search
+The page is built to be found by his name first, then by what he does.
+- The name leads everywhere a search engine reads first: the `<title>` ("Omer Elammary ·
+  Software Engineer in Toronto"), the meta description, and the page's only `h1`, which is
+  the small line above the headline. The headline itself is the `h2`, so the big line
+  stays the big line and nothing on screen changed.
+- A JSON-LD graph in `index.html` says what the page is: a `WebSite`, a `ProfilePage` and the
+  `Person` it's about (job, employer, school, Toronto, skills, and his GitHub, LinkedIn and
+  Instagram as `sameAs`, which ties those profiles to this site). Only facts the page states.
+- `robots.txt` allows everything and points to `sitemap.xml` (the page and the resume PDF).
+  When the content changes, bump the sitemap's `lastmod` and the ProfilePage's
+  `dateModified`.
+- Open Graph and Twitter tags carry a title, description, image and alt text for link
+  previews; `og.jpg` is the share image. `site.webmanifest` names the site and its icons.
+- Lighthouse (2026-09-30): SEO 100, Accessibility 100, Best Practices 100. The one failure
+  before was the missing `robots.txt`.
+- Off the page, and up to Omer: verify the domain in Google Search Console and submit the
+  sitemap; point the website field on GitHub, LinkedIn and Instagram at omerelammary.com; and
+  have the host redirect `www` to the bare domain, which the canonical tag names.
+
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
 Twitter tags in `index.html`.
