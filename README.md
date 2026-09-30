@@ -186,10 +186,12 @@ and left dots invisible), and dots stay visible if the reveal never runs.
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
 Twitter tags in `index.html`.
 
-The icon is a mug with `</>` for coffee and steam rising: caffeine + code, on the site's
-violet-to-ember gradient. `favicon.svg` is the source; `favicon.ico` (16, 32, 48) is for
+The icon is an OE monogram: a violet O and an ember E, the site's two accents, on its dark
+ink. Omer picked it from seven ideas (a code mug, a coffee bean, a 3 AM moon, a prompt,
+particles, the plus). `favicon.svg` is the source; `favicon.ico` (16, 32, 48) is for
 browsers without SVG icons, and `apple-touch-icon.png` (180, square, full-bleed) is for iOS,
-which rounds the corners itself. Strokes are heavy on purpose, so it still reads at 16 px.
+which rounds the corners itself. The strokes are heavy and the letters sit a hair apart, so
+it still reads as two letters at 16 px.
 
 ## Commit data
 `src/data/commits.json` is generated from local clones of your repos:
