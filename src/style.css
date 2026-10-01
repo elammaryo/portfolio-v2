@@ -24,12 +24,14 @@
 /* Until the intro takes over, keep the HUD and nav out of sight. If scripts never run, they appear anyway. */
 .intro-pending .hud > :not(.hero__stage):not(.hud__frame), .intro-pending .nav > * { opacity: 0; animation: introFallback 0s 5s forwards; }
 @keyframes introFallback { to { opacity: 1; } }
+/* The page colour lives on html. Body stays clear so the sky (sky.ts), which sits behind the
+   content at z-index -1, shows through: a background on body would paint over it. */
 html { background: var(--ink); }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 body {
   margin: 0;
-  background: var(--ink);
+  background: transparent;
   color: var(--fg);
   font-family: var(--body);
   font-size: 16px;
@@ -48,6 +50,21 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted); margin: 0 0 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
 .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 0 rgba(255, 179, 107, 0.6); animation: pulse 2s infinite; display: inline-block; flex: none; }
 @keyframes pulse { 70% { box-shadow: 0 0 0 10px rgba(255, 179, 107, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 179, 107, 0); } }
+
+/* ---------- Sky: stars, the odd meteor, a shower at the end (sky.ts) ---------- */
+.sky { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; overflow: hidden; }
+.sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sky__tw { position: absolute; width: 2px; height: 2px; margin: -1px 0 0 -1px; border-radius: 50%; background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.45); opacity: 0.25; animation: twinkle var(--d, 4s) ease-in-out var(--dl, 0s) infinite alternate; }
+@keyframes twinkle { to { opacity: 0.9; } }
+/* Head on the left, tail to the right; sky.ts turns it to face back along its path. The glow
+   is a drop-shadow, so it fades down the tail with the gradient instead of ringing the box. */
+.meteor { position: absolute; left: 0; top: 0; height: 2px; margin-top: -1px; border-radius: 999px; transform-origin: 0 50%; opacity: 0;
+  background: linear-gradient(90deg, #fff4dc, #ffc874 16%, rgba(255, 179, 107, 0.35) 55%, rgba(255, 179, 107, 0));
+  filter: drop-shadow(0 0 4px rgba(255, 190, 110, 0.6)); }
+.meteor::before { content: ""; position: absolute; left: -1px; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%;
+  background: #fffaf0; box-shadow: 0 0 10px 3px rgba(255, 200, 120, 0.55); }
+@media (prefers-reduced-motion: reduce) { .sky__tw { animation: none; opacity: 0.6; } }
 
 /* ---------- Grain + cursor ---------- */
 .grain { position: fixed; inset: -50%; z-index: 90; pointer-events: none; opacity: 0.06;
@@ -532,7 +549,8 @@ section { position: relative; }
 }
 
 /* ---------- Rhythm (when I ship) ---------- */
-.rhythm-section { background: linear-gradient(var(--ink), #0a0914 40%, #0a0914 70%, var(--ink)); }
+/* A violet haze rather than a solid band, so the sky still shows through it, dimmer. */
+.rhythm-section { background: linear-gradient(rgba(10, 9, 20, 0), rgba(10, 9, 20, 0.62) 40%, rgba(10, 9, 20, 0.62) 70%, rgba(10, 9, 20, 0)); }
 .rhythm { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 96px); padding-block: 120px 60px; align-items: center; }
 .rhythm__title { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 3.4vw, 2.8rem); line-height: 1.05; letter-spacing: -0.03em; margin: 0 0 0.8rem; }
 .rhythm__title em { color: var(--ember); }
@@ -565,61 +583,112 @@ section { position: relative; }
 .ticker__track span b { color: var(--ember); font-weight: 500; margin-right: 8px; }
 .ticker:hover .ticker__track { animation-play-state: paused; }
 
-/* ---------- Journey: a career map, then each company ---------- */
+/* ---------- Journey: a career map, then each company, side by side ---------- */
 /* The map (main.ts, drawCareer) places every role at its real dates on one axis, so overlaps
    show: SuperOver began while I was still at Skinopathy, and the degree was finished while
    working. Direct labels on the bars, so no colour has to be decoded. */
-.journey { padding-block: 120px 100px; }
-.journey__head { margin-bottom: 44px; }
-.career { position: relative; height: 118px; margin: 0 0 40px; }
+.journey { padding-block: 120px 96px; }
+.journey__head { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px 24px; margin-bottom: 44px; }
+.journey__nav { display: flex; gap: 8px; }
+.journey__btn { width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: transparent;
+  color: var(--fg); font: 400 1.05rem/1 var(--body); cursor: pointer; transition: border-color .3s, opacity .3s; }
+.journey__btn:hover:not(:disabled) { border-color: var(--fg); }
+.journey__btn:disabled { opacity: 0.3; cursor: default; }
+/* A finger swipes the row, and the next card showing at the edge says so: no arrows on touch. */
+@media (hover: none) and (pointer: coarse) { .journey__nav { display: none; } }
+.career { position: relative; height: 118px; margin: 0 0 36px; }
 .career__axis { position: absolute; left: 0; right: 0; top: 24px; height: 1px; background: var(--line); }
 .career__tick { position: absolute; top: 0; font-size: 0.66rem; color: var(--muted); letter-spacing: 0.08em; }
 .career__tick::after { content: ""; position: absolute; left: 0; top: 20px; width: 1px; height: 9px; background: rgba(237,235,245,0.25); }
 .career__tick--now { color: var(--ember); transform: translateX(-100%); }
 .career__tick--now::after { left: auto; right: 0; background: var(--ember); }
-.career__bar { position: absolute; height: 10px; border-radius: 999px; background: var(--c); transform-origin: left center; transition: opacity .3s, filter .3s; cursor: default; }
+/* A bar is also a way in: clicking one brings its card into the row (main.ts, initRoles). */
+.career__bar { position: absolute; height: 10px; border-radius: 999px; background: var(--c); transform-origin: left center; transition: opacity .3s, box-shadow .4s; cursor: pointer; font-style: normal; }
 .career__bar span { position: absolute; left: 0; top: 16px; font-size: 0.74rem; color: var(--fg); white-space: nowrap; }
 .career__bar--now::after { content: ""; position: absolute; right: -4px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 0 rgba(255,179,107,.6); animation: pulse 2s infinite; }
 /* The label sits on the axis, so it wears the page colour: the line stops at the words
    instead of striking through them, and a year tick that falls under it is masked too. */
-.career__mile { position: absolute; top: 19px; height: 11px; margin-left: -5.5px; display: flex; align-items: center; transform-origin: 5.5px 50%; transition: opacity .3s; }
-.career__mile::before { content: ""; flex: none; width: 11px; height: 11px; background: var(--c); transform: rotate(45deg) scale(.86); border-radius: 2px; }
+.career__mile { position: absolute; top: 19px; height: 11px; margin-left: -5.5px; display: flex; align-items: center; transform-origin: 5.5px 50%; transition: opacity .3s; cursor: pointer; font-style: normal; }
+.career__mile::before { content: ""; flex: none; width: 11px; height: 11px; background: var(--c); transform: rotate(45deg) scale(.86); border-radius: 2px; transition: box-shadow .4s; }
 .career__mile span { margin-left: 3px; padding: 2px 6px 2px 4px; background: var(--ink); font-size: 0.66rem; line-height: 1; color: var(--muted); white-space: nowrap; }
 .career.is-hot .career__bar:not(.is-hot), .career.is-hot .career__mile:not(.is-hot) { opacity: 0.25; }
-.roles { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.role { display: grid; grid-template-columns: 170px minmax(0, 0.9fr) minmax(0, 1.35fr); align-items: start; gap: 36px; padding: 40px 0; border-bottom: 1px solid var(--line); transition: background .4s; }
-.role__when { margin: 0.35rem 0 0; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.74rem; }
-.role__when::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
-.role--now .role__when::before { display: none; }
-.role--now .role__when { color: var(--ember); }
-.role__org { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(2rem, 3.6vw, 3.2rem); line-height: 1; letter-spacing: -0.035em; }
-.role__title { margin: 0.7rem 0 0; font-size: 1.05rem; color: var(--fg); }
-.role__meta { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.72rem; }
-.role__what { display: grid; gap: 14px; align-content: start; }
-.role__what p { margin: 0; color: #c9c5dc; font-size: 1rem; line-height: 1.6; }
-.role__what ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.role__what li { display: flex; gap: 12px; color: #b3afc7; font-size: 0.95rem; line-height: 1.55; }
-.role__what li::before { content: ""; width: 6px; height: 6px; margin-top: 0.62em; border-radius: 50%; background: var(--c); flex: none; }
-.role__after { color: var(--muted) !important; font-size: 0.9rem !important; }
-.role__stint { display: grid; gap: 10px; }
-.role__stint + .role__stint { padding-top: 18px; border-top: 1px dashed var(--line); }
-.role__sub { color: var(--fg) !important; font-weight: 600; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
-.role__sub .mono { color: var(--muted); font-weight: 400; font-size: 0.72rem; }
-.role__stack { display: flex; gap: 6px; flex-wrap: wrap; }
-.role__stack span { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
-.role--edu { padding-block: 28px; }
-.role--edu .role__org { font-size: clamp(1.5rem, 2.4vw, 2rem); }
-.role.is-hot { background: linear-gradient(90deg, color-mix(in srgb, var(--c) 6%, transparent), transparent 70%); }
-@media (max-width: 860px) {
-  .role { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 32px 0; }
-  .role__when { margin: 0; }
-  .career { height: 124px; }
-  .career__bar span, .career__mile span { font-size: 0.66rem; }
-}
+/* "You are here": the card at the front of the row lights its place on the map. */
+.career__bar.is-here { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent), 0 0 16px color-mix(in srgb, var(--c) 40%, transparent); }
+.career__mile.is-here::before { box-shadow: 0 0 12px var(--c); }
 /* On a phone half a year is ~50px: the year would run into the next tick, and the diamond's
    place on the axis already says when. */
 .career__mile b { font-weight: inherit; }
 @media (max-width: 520px) { .career__mile b { display: none; } }
+
+/* The roles run sideways (since 2026-10-01) to shorten a long page: stacked, they took
+   1,761px on a laptop and 2,374px on a phone. The row is full-bleed, but its padding
+   is the sum .wrap makes, so the first card lines up with the column above, and scroll-padding
+   snaps every card to that same line. The padding sits on the list, not the scroller: a flex
+   scroller drops its end padding from the scrollable width in some browsers. */
+.roles { --rpad: max(var(--gutter), calc((100% - var(--maxw)) / 2 + var(--gutter)));
+  position: relative; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--rpad); scrollbar-width: none; cursor: grab; }
+.roles::-webkit-scrollbar { display: none; }
+.roles:focus-visible { outline-offset: -2px; border-radius: 0; }
+/* Dragging with a mouse (main.ts) turns snapping off until the card it lands on is settled. */
+.roles.is-grabbing { cursor: grabbing; scroll-snap-type: none; user-select: none; }
+.roles__list { display: flex; gap: 16px; width: max-content; margin: 0; padding: 4px var(--rpad) 8px; list-style: none; }
+.role { position: relative; flex: none; width: 500px; display: flex; flex-direction: column; gap: 20px; padding: 30px 32px 28px;
+  border-radius: 26px; border: 1px solid var(--line); scroll-snap-align: start; transition: border-color .4s;
+  background: radial-gradient(120% 70% at 0% 0%, color-mix(in srgb, var(--c) 8%, transparent), transparent 62%), var(--ink-2); }
+.role::before { content: ""; position: absolute; top: -1px; left: 32px; right: 32px; height: 1px; background: linear-gradient(90deg, var(--c), transparent); }
+.role.is-hot { border-color: color-mix(in srgb, var(--c) 45%, transparent); }
+.role__when { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.74rem; }
+.role__when::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+.role--now .role__when::before { display: none; }
+.role--now .role__when { color: var(--ember); }
+.role__org { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.9rem, 2.8vw, 2.6rem); line-height: 1; letter-spacing: -0.035em; }
+.role__title { margin: 0.6rem 0 0; font-size: 1.02rem; color: var(--fg); }
+.role__meta { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.72rem; }
+.role__what { display: grid; gap: 12px; align-content: start; }
+.role__what p { margin: 0; color: #c9c5dc; font-size: 0.97rem; line-height: 1.6; }
+.role__what ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.role__what li { display: flex; gap: 12px; color: #b3afc7; font-size: 0.93rem; line-height: 1.55; }
+.role__what li::before { content: ""; width: 6px; height: 6px; margin-top: 0.62em; border-radius: 50%; background: var(--c); flex: none; }
+.role__after { color: var(--muted) !important; font-size: 0.88rem !important; }
+.role__stint { display: grid; gap: 10px; align-content: start; }
+.role__sub { color: var(--fg) !important; font-weight: 600; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.role__sub .mono { color: var(--muted); font-weight: 400; font-size: 0.72rem; }
+/* Pinned to the bottom, so the stacks line up along the row whatever each card says above. */
+.role__stack { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+.role__stack span { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.role--wide { width: 780px; }
+.role--wide .role__what { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; }
+.role--wide .role__stint:first-child { padding-right: 26px; }
+.role--wide .role__stint + .role__stint { padding-left: 26px; border-left: 1px dashed var(--line); }
+/* The degree is a milestone rather than a job: an outlined card with the map's diamond. */
+.role--edu { width: 290px; justify-content: center; align-items: center; text-align: center; gap: 14px; background: transparent; border-style: dashed; }
+.role--edu::before { display: none; }
+.role--edu .role__when { flex-direction: column; gap: 16px; }
+.role--edu .role__when::before { width: 13px; height: 13px; border-radius: 2px; transform: rotate(45deg); }
+.role--edu .role__org { font-size: clamp(1.45rem, 2vw, 1.85rem); }
+.role--edu .role__what p { color: var(--muted); font-size: 0.9rem; }
+.roles__rail { position: relative; height: 2px; margin-top: 24px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.roles__rail i { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: inherit; background: rgba(237, 235, 245, 0.5); }
+@media (max-width: 860px) {
+  .journey { padding-block: 96px 80px; }
+  .career { height: 124px; }
+  .career__bar span, .career__mile span { font-size: 0.66rem; }
+  /* One card at a time, with the next one showing at the edge. */
+  .role, .role--wide { width: min(440px, calc(100vw - 2 * var(--gutter) - 34px)); padding: 24px 22px 22px; }
+  .role::before { left: 22px; right: 22px; }
+  .role--wide .role__what { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .role--wide .role__stint:first-child { padding-right: 0; }
+  .role--wide .role__stint + .role__stint { padding-left: 0; border-left: 0; padding-top: 18px; border-top: 1px dashed var(--line); }
+  .role--edu { width: min(250px, 66vw); }
+}
+/* A phone shows one card at a time and the tallest sets the row's height: slightly tighter
+   type keeps the two-stint card from towering over the rest. */
+@media (max-width: 520px) {
+  .role { gap: 16px; }
+  .role__what p { font-size: 0.94rem; line-height: 1.55; }
+  .role__what li { font-size: 0.9rem; line-height: 1.5; }
+}
 
 /* ---------- Capabilities: skills × projects ---------- */
 .caps { padding-bottom: 40px; }

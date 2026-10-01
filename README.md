@@ -54,6 +54,26 @@ Debug flags (append to the URL): `?still=iced|mug|apps|systems|me|hello` starts 
 headless browser), `?nogl` forces the plain-type fallback, and `?debug` lets a test set
 `window.__levels` to fake the music.
 
+## The sky (`src/sky.ts`)
+Stars behind the whole page, a meteor every few seconds, and a shower when the contact section
+comes up. Omer's first portfolio (`elammaryo/cosmic-portfolio`) had a starfield with meteors,
+and he asked for it back on 2026-10-01. It returns quieter than it was, because this page
+already moves a lot (the particle hero, the beat pulse, the stacked cards):
+- The stars hold still. They are drawn once onto a canvas from a seeded generator, so a resize
+  redraws the same sky, and only 14 of them twinkle (CSS). One star per 7,000px² of window.
+- One meteor at a time, every 3.5–8 s (sometimes a second just behind it), falling right and
+  down at about 35° as on the old site, head first, brightening, then gone. None while the hero
+  fills the window (it covers the sky) or the tab is hidden.
+- The shower is ten meteors in under three seconds as `#contact` arrives, at most once every
+  20 s.
+
+The layer sits at `z-index: -1` behind everything, so the hero and the cards cover it and the
+open stretches between them show it. That is why `body` has no background (it would paint over
+the layer) and the page colour lives on `html`; the rhythm section's band became a
+semi-transparent haze for the same reason. It is `100lvh` tall, so a phone's address bar coming
+and going doesn't resize it. Meteors are elements moved by the Web Animations API, transform
+and opacity only, so nothing redraws the stars. Reduced motion keeps the stars, still.
+
 ## Projects
 The cards stack on desktop. Each `.project`'s bottom padding (45vh) is the dwell: how far you
 scroll with a card fully in view before the next one covers it. `main.ts` sets each card's
@@ -167,14 +187,32 @@ The nav clock is always Omer's time in Toronto. Its status is a guess from that 
 CMiC" 8:30 to 5 on weekdays, "probably committing" 10 PM to 5 AM, "off the clock" otherwise.
 
 ## Journey (where I've built)
-A career map, then each company. `drawCareer` in `main.ts` reads the dates off the role
-list itself (`data-from`, `data-to`, `data-lane`, `data-label`; `data-at` for the degree), so
-the map and the list can't disagree: every role sits at its real months on one axis from
-2023 to now, overlaps included (SuperOver began before Skinopathy ended; the degree was
-finished while working). The current role runs to this month and pulses. Pointing at a
+A career map, then the roles side by side. `drawCareer` in `main.ts` reads the dates off the
+role cards themselves (`data-from`, `data-to`, `data-lane`, `data-label`; `data-at` for the
+degree), so the map and the cards can't disagree: every role sits at its real months on one
+axis from 2023 to now, overlaps included (SuperOver began before Skinopathy ended; the degree
+was finished while working). The current role runs to this month and pulses. Pointing at a
 company lights its bars, and the other way round. Newest first, the way a recruiter reads.
 The degree's label sits on the axis in the page colour, so the line breaks around it rather
 than striking through, and on a phone it drops the year (half a year is ~50px there).
+
+The roles run sideways since 2026-10-01, to shorten the page: stacked, they took 1,761px on a
+laptop and 2,374px on a phone; the row takes 1,114 and 1,190. The row (`#roles`) is full-bleed
+with native scrolling and `scroll-snap`, and its padding lines the first card up with the
+column above. A finger or a trackpad swipes it. Lenis leaves sideways gestures over it to the
+browser (`data-lenis-prevent-horizontal`) and still smooth-scrolls the page for up-and-down
+ones. `initRoles` adds the rest:
+- the arrows step one card (hidden on touch screens, where the next card showing at the edge
+  says there is more);
+- a mouse drags the row and lands on the card it was heading for (snapping is off mid-drag,
+  or it would pull back every frame);
+- Shift and the wheel step a card per notch. Left to the browser, a notch only nudged a
+  snapping row, and it snapped straight back;
+- the cards in full view light their bars on the map, and clicking a bar brings its card in.
+
+The Skinopathy card holds two stints, side by side on a wide screen, so it is no taller than the
+rest. On a phone one card shows at a time and the tallest sets the row's height, so a shorter
+card keeps its stack pinned to the bottom.
 
 ## Capabilities
 `src/capabilities.ts` is the skills × projects grid. A cell is lit only if the text says

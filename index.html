@@ -498,14 +498,25 @@
   <section class="journey" id="journey">
     <div class="wrap">
       <div class="journey__head">
-        <p class="eyebrow mono">The journey so far</p>
-        <h2 class="section-title reveal-title">Where I’ve <em>built</em>.</h2>
+        <div>
+          <p class="eyebrow mono">The journey so far</p>
+          <h2 class="section-title reveal-title">Where I’ve <em>built</em>.</h2>
+        </div>
+        <div class="journey__nav">
+          <button class="journey__btn" id="rolesPrev" type="button" aria-controls="roles" aria-label="Previous role" disabled>←</button>
+          <button class="journey__btn" id="rolesNext" type="button" aria-controls="roles" aria-label="Next role">→</button>
+        </div>
       </div>
 
       <!-- A map of the roles below at their real dates, overlaps included (main.ts, drawCareer). -->
       <div class="career" id="career" aria-hidden="true"></div>
+    </div>
 
-      <ol class="roles">
+    <!-- The roles run sideways, newest first, and bleed off the right edge: the cut card is what
+         says there is more. Sideways swipes stay with the row (data-lenis-prevent-horizontal);
+         an up-or-down scroll over it still moves the page. -->
+    <div class="roles" id="roles" role="region" aria-label="Roles, newest first" tabindex="0" data-lenis-prevent-horizontal>
+      <ol class="roles__list">
         <li class="role role--now" data-role="cmic" data-from="2026-04" data-lane="0" data-label="CMiC" style="--c:#ffb36b">
           <p class="role__when mono"><span class="pulse"></span>Apr 2026 – now</p>
           <div class="role__who">
@@ -517,8 +528,8 @@
             <p>Flutter front ends for construction project management, inside an enterprise ERP platform.</p>
             <ul><li>Building project management screens in Flutter, on a codebase that keeps its local data in Drift</li></ul>
             <p class="role__after">After hours: GameDay, Athena and whatever the next idea is.</p>
-            <div class="role__stack mono"><span>Flutter</span><span>Dart</span><span>Drift</span></div>
           </div>
+          <div class="role__stack mono"><span>Flutter</span><span>Dart</span><span>Drift</span></div>
         </li>
         <li class="role" data-role="superover" data-from="2025-04" data-to="2026-04" data-lane="1" data-label="SuperOver" style="--c:#1fd17a">
           <p class="role__when mono">Apr 2025 – Apr 2026</p>
@@ -534,10 +545,12 @@
               <li>Stripe payments with verified webhooks, so a player joins a game only once payment is confirmed</li>
               <li>Shipped to the App Store and Google Play, with GitHub Actions building every TestFlight and Android release</li>
             </ul>
-            <div class="role__stack mono"><span>Flutter</span><span>Firebase</span><span>Node.js</span><span>React</span><span>Stripe</span></div>
           </div>
+          <div class="role__stack mono"><span>Flutter</span><span>Firebase</span><span>Node.js</span><span>React</span><span>Stripe</span></div>
         </li>
-        <li class="role" data-role="skinopathy" style="--c:#8fd3ff">
+        <!-- Two stints at one company: on a wide screen they sit side by side, so this card is no
+             taller than the others and the row stays short. -->
+        <li class="role role--wide" data-role="skinopathy" style="--c:#8fd3ff">
           <p class="role__when mono">Jan 2023 – May 2025</p>
           <div class="role__who">
             <h3 class="role__org">Skinopathy</h3>
@@ -552,7 +565,6 @@
                 <li>Health card verification with expiry tracking and renewal reminders</li>
                 <li>An AI skin assessment flow and a multi-step medical questionnaire with conditional questions</li>
               </ul>
-              <div class="role__stack mono"><span>Flutter</span><span>Go</span><span>Docker</span></div>
             </div>
             <div class="role__stint" data-from="2023-01" data-to="2023-12" data-lane="0" data-label="Skinopathy intern">
               <p class="role__sub">Software Engineer Intern <span class="mono">Jan – Dec 2023</span></p>
@@ -562,6 +574,7 @@
               </ul>
             </div>
           </div>
+          <div class="role__stack mono"><span>Flutter</span><span>Go</span><span>Docker</span></div>
         </li>
         <li class="role role--edu" data-role="york" data-at="2024" style="--c:#c9b8ff">
           <p class="role__when mono">2024</p>
@@ -573,6 +586,7 @@
         </li>
       </ol>
     </div>
+    <div class="wrap"><div class="roles__rail" aria-hidden="true"><i id="rolesThumb"></i></div></div>
   </section>
 
   <!-- ===== Capabilities ===== -->

@@ -23,6 +23,7 @@ import { initAthenaEgg } from './eggs/athena';
 import { initBudgetEgg } from './eggs/budget';
 import { initGlazeBot } from './glazebot';
 import { initGameOverEgg } from './eggs/gameover';
+import { initSky } from './sky';
 import { drawClock, drawHeatmap, drawStack, fillTicker } from './charts';
 import { player } from './audio';
 
@@ -38,7 +39,11 @@ const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = docume
 const $$ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => [...root.querySelectorAll(s)] as T[];
 
 /* ---------- Smooth scroll ---------- */
-const lenis = reduced ? null : new Lenis({ lerp: 0.09, wheelMultiplier: 1 });
+const lenis = reduced ? null : new Lenis({
+  lerp: 0.09, wheelMultiplier: 1,
+  // Shift and the wheel over the roles row moves the row (initRoles), not the page.
+  virtualScroll: ({ event }) => !(event.shiftKey && (event.target as Element | null)?.closest?.('#roles')),
+});
 if (lenis) {
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((t) => lenis.raf(t * 1000));
@@ -55,6 +60,9 @@ $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
     else (target as HTMLElement).scrollIntoView();
   });
 });
+
+/* ---------- The sky behind the page ---------- */
+initSky({ reduced });
 
 /* ---------- WebGL ---------- */
 initHeroSection({ data, reduced, lenis }).then(() => { ScrollTrigger.sort(); ScrollTrigger.refresh(); });
@@ -165,6 +173,104 @@ function drawCareer(host: HTMLElement) {
   return bars;
 }
 const careerBars = drawCareer($('#career'));
+
+/* ---------- The roles, side by side ---------- */
+// The row scrolls sideways to keep the page short (see "Journey" in style.css). A finger or a
+// trackpad moves it natively and snaps to a card; a mouse wheel still moves the page, so a
+// mouse drags the row instead, and the arrows step one card at a time. The map above follows
+// along: the cards in full view light their bars, and clicking a bar brings its card in.
+function initRoles(track: HTMLElement, map: HTMLElement) {
+  const cards = $$<HTMLElement>('.role', track);
+  const prev = $<HTMLButtonElement>('#rolesPrev'), next = $<HTMLButtonElement>('#rolesNext');
+  const thumb = $('#rolesThumb');
+  const marks = $$<HTMLElement>('.career__bar, .career__mile', map);
+  const max = () => track.scrollWidth - track.clientWidth;
+  // Where the row stops for a card: its left edge on the column line. The first card rests on
+  // that line, so its offset is the row's padding. The last few can't all reach it.
+  const stop = (c: HTMLElement) => Math.min(max(), c.offsetLeft - cards[0].offsetLeft);
+  const go = (i: number) => track.scrollTo({ left: stop(cards[i]), behavior: reduced ? 'auto' : 'smooth' });
+  const step = (dir: number) => {
+    const x = track.scrollLeft, stops = cards.map(stop);
+    const i = dir > 0 ? stops.findIndex((s) => s > x + 4) : stops.findLastIndex((s) => s < x - 4);
+    if (i >= 0) go(i);
+  };
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
+  // Shift and the wheel steps a card per notch. Left to the browser, a notch on a snapping row
+  // only nudged it, and the snap pulled it straight back to the card it started from.
+  let notch = -1e9;
+  track.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (!e.shiftKey || !d) return;
+    e.preventDefault();
+    if (e.timeStamp - notch > 320) { notch = e.timeStamp; step(Math.sign(d)); }
+  }, { passive: false });
+  marks.forEach((m) => m.addEventListener('click', () => {
+    const i = cards.findIndex((c) => c.dataset.role === m.dataset.role);
+    if (i >= 0) go(i);
+  }));
+
+  let frame = 0;
+  const sync = () => {
+    frame = 0;
+    const x = track.scrollLeft, w = track.clientWidth;
+    prev.disabled = x <= 2;
+    next.disabled = x >= max() - 2;
+    thumb.style.width = `${(w / track.scrollWidth) * 100}%`;
+    thumb.style.transform = `translateX(${(x / w) * 100}%)`;
+    const shown = new Set(cards.filter((c) => c.offsetLeft - x > -8 && c.offsetLeft + c.offsetWidth - x < w + 8).map((c) => c.dataset.role));
+    marks.forEach((m) => m.classList.toggle('is-here', shown.has(m.dataset.role)));
+  };
+  const later = () => { frame ||= requestAnimationFrame(sync); };
+  track.addEventListener('scroll', later, { passive: true });
+  window.addEventListener('resize', later);
+  sync();
+
+  // Mouse drag. Snapping is off while the row follows the pointer (it would pull back to a card
+  // every frame) and comes back once the glide to the card it was heading for has ended.
+  let id = -1, x0 = 0, s0 = 0, moved = false, v = 0, lastX = 0, lastT = 0, drags = 0;
+  track.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    id = e.pointerId; x0 = lastX = e.clientX; lastT = e.timeStamp; s0 = track.scrollLeft; moved = false; v = 0;
+  });
+  track.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== id) return;
+    const dx = e.clientX - x0;
+    if (!moved) {
+      // A few pixels of give, so a click (or a double-click to select a word) is not a drag.
+      if (Math.abs(dx) < 6) return;
+      moved = true;
+      drags++;
+      track.setPointerCapture(id);
+      track.classList.add('is-grabbing');
+      getSelection()?.removeAllRanges();
+    }
+    track.scrollLeft = s0 - dx;
+    if (e.timeStamp > lastT) v = (e.clientX - lastX) / (e.timeStamp - lastT);
+    lastX = e.clientX; lastT = e.timeStamp;
+  });
+  const release = (e: PointerEvent) => {
+    if (e.pointerId !== id) return;
+    id = -1;
+    if (!moved) return;
+    // Carry the flick a little way, then land on the nearest card: a quick short flick still
+    // moves on by one.
+    const aim = track.scrollLeft - v * 240;
+    const stops = cards.map(stop);
+    const to = stops.reduce((a, s) => (Math.abs(s - aim) < Math.abs(a - aim) ? s : a), stops[0]);
+    track.scrollTo({ left: to, behavior: reduced ? 'auto' : 'smooth' });
+    // Only this drag's glide may turn snapping back on: a new drag inside the glide owns it now.
+    const mine = drags;
+    const end = () => { if (mine === drags) track.classList.remove('is-grabbing'); };
+    track.addEventListener('scrollend', end, { once: true });
+    setTimeout(end, 900);
+  };
+  track.addEventListener('pointerup', release);
+  track.addEventListener('pointercancel', release);
+  // The click that ends a drag is not a click.
+  track.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+}
+initRoles($('#roles'), $('#career'));
 
 /* ---------- Data-driven pieces ---------- */
 const clockBars = drawClock($<SVGSVGElement>('#clock'), data.hours);
@@ -377,10 +483,12 @@ if (!reduced) {
   gsap.from(langBars, { scaleX: 0, duration: 1.4, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '#langs', start: 'top 85%' } });
   gsap.from('.fact', { y: 30, opacity: 0, duration: 0.9, stagger: 0.1, ease: 'power3.out', scrollTrigger: { trigger: '.facts', start: 'top 85%' } });
 
-  // Journey: the career map plays its years in order, left to right, then each company rises in.
+  // Journey: the career map plays its years in order, left to right, then the cards slide in
+  // from the side the row scrolls toward.
   gsap.from(careerBars, { scaleX: 0, duration: 1.1, ease: 'expo.out', stagger: 0.18, scrollTrigger: { trigger: '#career', start: 'top 80%' } });
   gsap.from('.career__mile', { scale: 0, duration: 0.6, ease: 'back.out(2)', delay: 0.5, scrollTrigger: { trigger: '#career', start: 'top 80%' } });
-  $$('.role').forEach((r) => gsap.from(r.children, { y: 26, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: r, start: 'top 85%' } }));
+  gsap.from('.role', { x: 80, opacity: 0, duration: 1.1, stagger: 0.09, ease: 'power3.out', scrollTrigger: { trigger: '#roles', start: 'top 85%' } });
+  gsap.from('.journey__nav', { opacity: 0, duration: 0.8, delay: 0.3, scrollTrigger: { trigger: '.journey__head', start: 'top 85%' } });
 
   // About photo parallax, contact marquee speed.
   gsap.fromTo('.about__photo img', { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: '.about', start: 'top bottom', end: 'bottom top', scrub: true } });
