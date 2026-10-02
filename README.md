@@ -12,73 +12,79 @@ Deploy: point Vercel/Netlify at this folder (build `npm run build`, output `dist
 
 ## The hero
 The headline is Omer's line from the old site, "Turning caffeine + code into beautiful
-applications.", set in HTML with his name in the line above it. Beside it (below it on a phone)
-a light sculpture: a mug of coffee whose steam rises as code. Tapping the Caffeine chip
-while it's showing swaps in an iced coffee (his usual) with code frozen in the ice, and back;
-`?coffee=iced` starts on it. Each shape's `lift` is a fraction of its own height, set so what
-you actually see (the mug's steam fades before the top of its box) sits centred between the
-"Last commit" label and the caption. The HUD is a CSS grid, and
-`.hero__stage` is an empty cell the scene measures and fits every shape into, so where the
-sculpture sits is decided in `style.css` at each width, not in the scene.
+applications.", set in HTML with his name in the line above it. Beside it (under it on a phone)
+is a planet with two words orbiting it, FULL-STACK and CLOUD ENGINEERING, under "Currently
+orbiting between…". That was the old site's hero (a CSS planet with the words curved round it:
+his full-stack work on one side, his pull toward cloud on the other), and on 2026-10-02 he
+asked for it back in place of the particle coffee mug, which had grown commit counts, shape
+chips and hints around it. The hero now carries the copy and the planet and nothing else.
 
-`src/hero/` holds the sculpture:
-- `shapes.ts` builds every particle's target (position + colour) for each shape: the iced
-  coffee, the mug, the phone, the systems circuit board, the portrait
-  (`public/img/profile.webp`) and HELLO. Both coffees are sampled on real 3D surfaces, lit
-  from the upper left. The iced cup is clear, so it's drawn thin and the drink does the
-  colour (cream settled under coffee, a swirl, a lamp-coloured straw, a `</>` badge); each
-  ice cube carries a glyph on the face that looks at the camera. The mug thins the far half of
-  its wall so it reads as solid. Particle kinds live in the integer part of a target's `w`:
-  2 a glyph of steam, 3 vapour, 4 a surface that ripples with the bass (the coffee, and the
-  ice riding on it), 5+ dust.
-- `scene.ts` runs the GPU simulation (position/velocity textures, springs, flow field,
-  cursor wind, click shockwave), bloom and the lens pass. `STEAM_GLSL` moves the steam: each
-  glyph (`{ } </> ; () => 0 1 []`, sampled from JetBrains Mono) rises up one of three columns,
-  sways, turns and comes apart into vapour, fading in at the cup and out before the top.
-  Brightness is normalised per shape, and quality drops automatically on slow devices.
-- `index.ts` wires the HUD: intro (it says "Hey, I'm Omer Elammary." in the headline's own
-  type while "brewing 0000 commits" counts and the coffee fills from the foot up, then the
-  greeting lifts away and the headline rises word by word into its place), shape chips, menu-hover previews and the pinned
-  scroll fly-through. The Caffeine caption is computed from the commit hours: 3 AM is the
-  second-busiest hour of the day. "Last commit" is the newest commit in `commits.json`, so it
-  moves when the data is regenerated, not live; times show as 12-hour with AM/PM.
+`src/hero/planet.ts` draws it with three.js, with no post-processing:
+- The planet is one sphere and one shader: soft violet bands, the old planet's latitude and
+  longitude lines (every 30°, about a pixel wide at any size), a half-moon light from the upper
+  left, ember lamps on the night side (the site's "after hours"), and an atmosphere rim. A
+  premultiplied glow sits behind it.
+- Each word is drawn round a canvas strip (`ringTexture`: the word, a thin track, a star, four
+  or three times round) and mapped onto an open cylinder. The rings are tilted just enough that
+  their near sides clear the planet's edge, so FULL-STACK arcs over it and CLOUD ENGINEERING
+  under it, where the old site set them, and both start with a whole word in front. Letters
+  thin out as the band turns edge-on, and the far side, seen through the ring from behind, is a
+  faint ghost. A dark halo under each letter keeps it legible against the lit planet.
+- Two comets with dotted orbits pass behind the planet.
+- The canvas is transparent: the page's sky (see below) shows through the whole hero.
 
-The **♪ Beat** chip (shown when there is at least one track, see Audio below) plays the GameOver
-beat and the sculpture pulses with it: each kick is a swell plus a soft push from the centre
-(about half a click), the bass ripples the coffee, the mids stir the flow and the hi-hats
-sparkle. Brightness moves only a little, so it reads as a pulse, not a strobe.
+Moving the pointer tilts the system a few degrees. Dragging the planet spins it and winds the
+rings up, then they coast; a tap on the planet (not a drag) calls up a meteor shower and a
+flash along the rings. When a GameOver beat plays, the atmosphere breathes with the bass and
+the words brighten a touch on each kick, kept faint as Omer asked of the old hero.
 
-Debug flags (append to the URL): `?still=iced|mug|apps|systems|me|hello` starts already formed,
-`?size=256` sets the particle texture size, `?nobloom`, `?slow=10` slows all animation,
-`?fixeddt=0.0167` steps the simulation by a fixed time per frame (screenshots in a slow
-headless browser), `?nogl` forces the plain-type fallback, and `?debug` lets a test set
+`hero/index.ts` runs the intro: "Hey, I'm Omer Elammary." rises in the headline's own type
+while dawn comes round the planet's left limb (a crescent growing into the half-moon) and the
+words write themselves round their rings, then the greeting lifts away and the headline rises
+word by word. Leaving the hero, the copy lifts away and the planet sinks a little slower than
+the page. Nothing is pinned. Without WebGL, the old site's flat planet (CSS and an SVG
+`textPath`) takes the canvas's place. Reduced motion shows the formed scene, still.
+
+Debug flags (append to the URL): `?still` starts with everything in place and no intro,
+`?nogl` forces the flat planet, `?slow=10` slows all animation, and `?debug` lets a test set
 `window.__levels` to fake the music.
 
 ## The sky (`src/sky.ts`)
 Stars behind the whole page, a meteor every few seconds, and a shower when the contact section
 comes up. Omer's first portfolio (`elammaryo/cosmic-portfolio`) had a starfield with meteors,
 and he asked for it back on 2026-10-01. It returns quieter than it was, because this page
-already moves a lot (the particle hero, the beat pulse, the stacked cards):
+already moves a lot (the hero's planet, the beat pulse, the stacked cards):
 - The stars hold still. They are drawn once onto a canvas from a seeded generator, so a resize
   redraws the same sky, and only 14 of them twinkle (CSS). One star per 7,000px² of window.
 - One meteor at a time, every 3.5–8 s (sometimes a second just behind it), falling right and
-  down at about 35° as on the old site, head first, brightening, then gone. None while the hero
-  fills the window (it covers the sky) or the tab is hidden.
+  down at about 35° as on the old site, head first, brightening, then gone. The first waits
+  until the hero's intro is over; a hidden tab gets none.
 - The shower is ten meteors in under three seconds as `#contact` arrives, at most once every
-  20 s.
+  20 s. A tap on the hero's planet calls one too (`meteorShower(true)`), waiting only for the
+  last to clear.
 
-The layer sits at `z-index: -1` behind everything, so the hero and the cards cover it and the
-open stretches between them show it. That is why `body` has no background (it would paint over
+The layer sits at `z-index: -1` behind everything. The hero is transparent, so the planet hangs
+in it; the cards cover it and the open stretches between them show it. That is why `body` has no background (it would paint over
 the layer) and the page colour lives on `html`; the rhythm section's band became a
 semi-transparent haze for the same reason. It is `100lvh` tall, so a phone's address bar coming
 and going doesn't resize it. Meteors are elements moved by the Web Animations API, transform
 and opacity only, so nothing redraws the stars. Reduced motion keeps the stars, still.
 
 ## Projects
-The cards stack on desktop. Each `.project`'s bottom padding (45vh) is the dwell: how far you
-scroll with a card fully in view before the next one covers it. `main.ts` sets each card's
-sticky `top` so a card taller than the window stops with its bottom (links, stack) on screen,
-and shrinks any project name that would overflow its column.
+On a wide screen the cards stack like a deck. Each card sticks 14px lower than the one before,
+so the ones you have passed show as edges above it, and `main.ts` lifts a card taller than the
+window so it stops with its bottom (links, stack) on screen. As the next card rises over it, a
+card sinks back to 94% and dims, scrubbed to the scroll, from the moment its bottom starts being
+covered until the next card lands. The dim is an overlay faded by opacity (`.project__shade`).
+
+It used to hold each card still for 45vh of scrolling with the next one out of sight, then
+dim it with a `brightness()` filter. On 2026-10-02 Omer said it stalled and then the card went
+dark all at once: the hold was scrolling with nothing moving, and the filter repainted the
+whole card, art and all, every frame. Now the hold is 16vh with the next card already rising
+into view, the dim is spread over the whole cover, and the cards are a little shorter (smaller
+names, tighter padding). The section went from 6,178px to 4,828px on a laptop. Phones and
+tablets get the cards one after another, unstacked. `main.ts` also shrinks any project name
+that would overflow its column.
 
 ## Under the hood (system flows)
 `src/systems/flows.ts` holds four real request paths (SuperOver join, GameDay e-transfer,
@@ -124,9 +130,9 @@ out of the card's reveal animation (a from-tween read their mid-transition opaci
 `?debug` also exposes `__gd` (pitch) and `__so` (Super Over) for scripted tests.
 
 ## Audio (`src/audio.ts`)
-One player for the page: the GameOver card plays it, the hero reacts to it, and a pill in the
-corner keeps it controllable while scrolling. With no tracks, the GameOver card is a picture
-and the Beat chip is hidden.
+One player for the page: the GameOver card plays it, the hero's planet reacts to it, and a
+pill in the corner keeps it controllable while scrolling. With no tracks, the GameOver card is
+a picture.
 
 The tracks are two of Omer's beats, the newest version of each in his Drive: Starlight
 (#17, trap, 130 BPM) and Senses (#41, drill, 134 BPM). He swapped them in on 2026-09-29 for
@@ -152,16 +158,17 @@ await), and a file that won't load says so on the card instead of showing 0:00. 
 beat: run `grid` on it, pick the bars, add it to the script's `SPEC`, run `cut`, and copy the
 starts and lengths it prints into `TRACKS`.
 
-`levels()` feeds the hero and the card. Mids and highs come from the visualizer's analyser;
+`levels()` feeds the hero's planet and the card. Mids and highs come from the visualizer's analyser;
 bass and kicks come from a second, unsmoothed one, because an 808 pinned the visualizer's
 bass at ~0.85 (it tops out at -30 dB) and the old kick test fired 4 times in 43 seconds. A
 kick is now the 40–120 Hz band rising 10 dB within ~50 ms: tried offline on every beat used
 so far, that is 1–2.5 hits a second, nearly all on a sixteenth. The kick also reports a full 1 on
-the frame that hears it (it used to decay first and top out at 0.86, so the hero's kick
-shockwave, which waits for >0.95, never fired). Once bass and kicks really moved, the hero's
-response was too strong: Omer asked twice to turn it down, so every amount in `scene.ts`
-(swell, brightness, ripple, sparkle, flow, the kick's shockwave) is now about a quarter of
-the first tuning, and the card's logo and aurora pulse about half.
+the frame that hears it (it used to decay first and top out at 0.86, so the old particle
+hero's kick shockwave, which waited for >0.95, never fired). Once bass and kicks really moved,
+that hero's response was too strong and Omer asked twice to turn it down; the planet that
+replaced it (2026-10-02) starts from that lesson, with a faint swell of the atmosphere and a
+small brightening of the words, and the card's logo and aurora pulse about half their first
+tuning.
 
 ## GlazeBot (`src/glazebot.ts`)
 The chat widget talks to the bot at `ai-chatbot-kcyl.onrender.com` (repo
@@ -171,8 +178,8 @@ says it's on mute rather than failing. Render's free tier sleeps: the widget pin
 when someone hovers the launcher, and says so if a cold start is slow.
 
 The launcher is the old site's: a glass tile with Lucide's bot icon, a pink dot, and a
-"GlazeBot AI" label that slides out on hover. It stays hidden on the first screen (it sat on
-the hero's chips on a phone) and slides in once the page scrolls; the first time, the label
+"GlazeBot AI" label that slides out on hover. It stays hidden on the first screen (so the
+headline lands before anything asks to chat) and slides in once the page scrolls; the first time, the label
 opens for a few seconds, once per visit.
 
 ## When I ship
@@ -242,7 +249,10 @@ The page is built to be found by his name first, then by what he does.
 
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
-Twitter tags in `index.html`.
+Twitter tags in `index.html`: his name and the old site's line on the left, the hero's planet
+on the right. It is a screenshot of the real planet (`createPlanet` with `formed` and
+`reduced`, so one still frame) on a 1200×630 page, saved as a JPEG; redo it when the hero
+changes, so a shared link looks like the page it opens.
 
 The icon is an OE monogram: a violet O and an ember E, the site's two accents, on its dark
 ink. Omer picked it from seven ideas (a code mug, a coffee bean, a 3 AM moon, a prompt,

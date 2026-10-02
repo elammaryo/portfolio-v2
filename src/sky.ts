@@ -2,15 +2,15 @@
 // contact section comes into view.
 //
 // Omer's first portfolio (elammaryo/cosmic-portfolio) had a starfield with meteors, and on
-// 2026-10-01 he asked for it back. It returns quieter than it was: this page already has the
-// particle hero and the beat-reactive mug, so the stars hold still (drawn once, onto a canvas),
-// only a dozen of them twinkle, and meteors come one at a time instead of four on a loop. The
-// shower is kept for the end of the page.
+// 2026-10-01 he asked for it back. It returns quieter than it was: the stars hold still (drawn
+// once, onto a canvas), only a dozen of them twinkle, and meteors come one at a time instead of
+// four on a loop. The shower is kept for the end of the page, and for a tap on the hero's planet.
 //
-// It sits behind everything (z-index -1; html carries the page colour and body has none), so the
-// hero and the cards cover it and the open stretches between them show it. Meteors are elements
-// moved by the Web Animations API, transform and opacity only, so they run on the compositor and
-// nothing redraws the stars. Reduced motion keeps the stars and drops the meteors and twinkle.
+// It sits behind everything (z-index -1; html carries the page colour and body has none). The
+// hero is transparent, so the planet hangs in this sky; the cards cover it and the open
+// stretches between them show it. Meteors are elements moved by the Web Animations API,
+// transform and opacity only, so they run on the compositor and nothing redraws the stars.
+// Reduced motion keeps the stars and drops the meteors and twinkle.
 
 /** One star per this many square pixels of window. The old site used 10,000, at 1–4px each. */
 const STAR_AREA = 7000;
@@ -19,6 +19,13 @@ const TWINKLES = 14;
 const EVERY: [number, number] = [3.5, 8];
 
 type Star = { u: number; v: number; r: number; a: number; halo: boolean; rgb: string };
+
+let showerNow: ((force: boolean) => void) | null = null;
+/**
+ * A meteor shower. On its own the sky allows one every twenty seconds; `force` (a tap on the
+ * planet) only waits for the last one to clear. Does nothing under reduced motion.
+ */
+export const meteorShower = (force = false) => showerNow?.(force);
 
 // A seeded generator, so a resize redraws the same sky rather than a new one.
 const seeded = (seed: number) => () => {
@@ -110,31 +117,30 @@ export function initSky({ reduced }: { reduced: boolean }) {
     run.oncancel = () => el.remove();
   };
 
-  // Behind the hero there is nothing to see (it covers the sky), and a hidden tab needs none.
-  let heroShown = 1;
-  const hero = document.querySelector('#hero');
-  if (hero) new IntersectionObserver(([e]) => { heroShown = e.intersectionRatio; }, { threshold: [0, 0.3, 0.6, 1] }).observe(hero);
-  const ambient = () => window.setTimeout(() => {
-    if (!document.hidden && heroShown < 0.6) {
+  // The first waits until the hero's intro is over, so nothing crosses the greeting. A hidden
+  // tab gets none.
+  const ambient = (wait: number) => window.setTimeout(() => {
+    if (!document.hidden) {
       meteor();
       if (Math.random() < 0.2) window.setTimeout(() => meteor(), 300 + Math.random() * 500);
     }
-    ambient();
-  }, (EVERY[0] + Math.random() * (EVERY[1] - EVERY[0])) * 1000);
-  ambient();
+    ambient((EVERY[0] + Math.random() * (EVERY[1] - EVERY[0])) * 1000);
+  }, wait);
+  ambient(5200);
 
   // The shower: ten meteors in under three seconds as the contact section arrives, at most once
   // every twenty seconds however often you scroll back and forth past it.
   let lastShower = -Infinity;
-  const shower = () => {
+  const shower = (force = false) => {
     const now = performance.now();
-    if (document.hidden || now - lastShower < 20000) return;
+    if (document.hidden || now - lastShower < (force ? 2600 : 20000)) return;
     lastShower = now;
     const w = window.innerWidth, h = window.innerHeight;
     for (let i = 0; i < 10; i++) {
       window.setTimeout(() => meteor({ x: Math.random() * w * 0.85 - w * 0.12, y: Math.random() * h * 0.42 - 30 }, 0.9 + Math.random() * 0.45), i * 230 + Math.random() * 180);
     }
   };
+  showerNow = shower;
   const contact = document.querySelector('#contact');
   if (contact) new IntersectionObserver(([e]) => { if (e.isIntersecting) shower(); }, { rootMargin: '0px 0px -40% 0px' }).observe(contact);
 }

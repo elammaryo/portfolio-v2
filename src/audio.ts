@@ -1,4 +1,4 @@
-// One audio player for the whole page. The GameOver card plays it, the hero's letters react
+// One audio player for the whole page. The GameOver card plays it, the hero's planet reacts
 // to it, and a small now-playing pill keeps it controllable while you scroll, the way
 // GameOver's own player keeps playing between pages.
 //

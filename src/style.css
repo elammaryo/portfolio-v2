@@ -22,7 +22,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 /* Until the intro takes over, keep the HUD and nav out of sight. If scripts never run, they appear anyway. */
-.intro-pending .hud > :not(.hero__stage):not(.hud__frame), .intro-pending .nav > * { opacity: 0; animation: introFallback 0s 5s forwards; }
+.intro-pending .hero__copy > *, .intro-pending .orbit__caption, .intro-pending .hero__cue, .intro-pending .nav > * { opacity: 0; animation: introFallback 0s 5s forwards; }
 @keyframes introFallback { to { opacity: 1; } }
 /* The page colour lives on html. Body stays clear so the sky (sky.ts), which sits behind the
    content at z-index -1, shows through: a background on body would paint over it. */
@@ -40,6 +40,7 @@ body {
   overflow-x: hidden;
 }
 img { max-width: 100%; display: block; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 a { color: inherit; text-decoration: none; }
 em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 ::selection { background: var(--signal); color: var(--ink); }
@@ -119,27 +120,18 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .project .btn--flow { border-color: color-mix(in srgb, var(--pc) 55%, transparent); color: var(--pc); }
 .project .btn--flow:hover { border-color: var(--pc); background: color-mix(in srgb, var(--pc) 12%, transparent); }
 
-/* ---------- Hero: the line on the left, a light sculpture on the right ---------- */
-/* The HUD is a grid. .hero__stage is an empty cell the WebGL scene measures and fits the
-   sculpture into (scene.ts, measureStage), so where the mug sits is decided here, per width. */
-.hero { position: relative; height: 100svh; min-height: 600px; overflow: hidden; background: var(--ink); }
-.hero__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; }
-.hud { position: absolute; inset: 0; z-index: 2; pointer-events: none; color: var(--fg);
-  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: 146px minmax(0, 1fr) auto;
-  grid-template-areas: ". ." "copy stage" "copy switch"; column-gap: clamp(16px, 3vw, 48px);
-  padding: 0 calc(var(--gutter) + 34px) 46px; }
-.hud a, .hud button { pointer-events: auto; }
-.hud__muted { color: var(--muted); }
-.hud__frame i { position: absolute; width: 22px; height: 22px; border-color: rgba(237,235,245,0.35); border-style: solid; border-width: 0; }
-.hud__frame i:nth-child(1) { left: var(--gutter); top: 84px; border-left-width: 1px; border-top-width: 1px; }
-.hud__frame i:nth-child(2) { right: var(--gutter); top: 84px; border-right-width: 1px; border-top-width: 1px; }
-.hud__frame i:nth-child(3) { left: var(--gutter); bottom: 22px; border-left-width: 1px; border-bottom-width: 1px; }
-.hud__frame i:nth-child(4) { right: var(--gutter); bottom: 22px; border-right-width: 1px; border-bottom-width: 1px; }
-.hud__tr { position: absolute; top: 98px; right: calc(var(--gutter) + 34px); margin: 0; display: grid; gap: 4px; justify-items: end; text-align: right;
-  letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.68rem; }
-.hud__live { display: inline-flex; align-items: center; gap: 8px; }
+/* ---------- Hero: the line on the left, the planet on the right ---------- */
+/* No background: the page's sky (sky.ts) shows behind the planet. The planet draws into a
+   canvas inside .hero__stage, a grid cell beside the headline (under it on a phone), so where
+   it sits is decided here, per width. Nothing else lives in the hero: it used to carry commit
+   counts, shape chips and hints, and on 2026-10-02 Omer asked for it to breathe. */
+.hero { position: relative; height: 100svh; min-height: 600px; overflow: hidden; }
+.hero__inner { position: absolute; inset: 0; z-index: 2; color: var(--fg);
+  display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); grid-template-rows: 104px minmax(0, 1fr) 64px;
+  grid-template-areas: ". ." "copy stage" ". ."; column-gap: clamp(16px, 3vw, 48px);
+  padding: 0 calc(var(--gutter) + 34px); }
 
-.hero__copy { grid-area: copy; align-self: center; display: grid; justify-items: start; gap: 22px; padding-bottom: 12px; }
+.hero__copy { grid-area: copy; align-self: center; display: grid; justify-items: start; gap: 24px; padding-bottom: 12px; }
 .hero__who { margin: 0; font-weight: 400; color: var(--muted); text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; }
 .hero__who b { color: var(--fg); font-weight: 400; }
 .hero__lines { position: relative; }
@@ -160,38 +152,46 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
   background: var(--ember); box-shadow: 0 0 0 0.09em rgba(255, 179, 107, 0.16), 0 0 42px rgba(255, 179, 107, 0.45); }
 .hero__plus i { font: 700 0.46em/1 var(--body); font-style: normal; letter-spacing: 0; color: var(--ink); }
 .hero__pair { white-space: nowrap; }
-.hud__thesis { margin: 0; max-width: 30em; font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.5; color: #bfbbd2; text-wrap: pretty; }
-.hud__ctas { display: flex; gap: 8px; flex-wrap: wrap; }
-.hud__ctas .btn { padding: 11px 20px; font-size: 0.86rem; }
+.hero__thesis { margin: 0; max-width: 30em; font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.5; color: #bfbbd2; text-wrap: pretty; }
+.hero__ctas { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero__ctas .btn { padding: 11px 20px; font-size: 0.86rem; }
 
-.hero__stage { grid-area: stage; position: relative; min-height: 0; }
-.hud__intro { position: absolute; left: 50%; top: calc(50% + 70px); transform: translateX(-50%); margin: 0; color: var(--muted); text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.7rem; white-space: nowrap; opacity: 0; font-variant-numeric: tabular-nums; }
-.hud__switch { grid-area: switch; justify-self: center; display: grid; justify-items: center; gap: 12px; padding-top: 10px; }
-.hud__caption { margin: 0; color: #c9c5dc; text-align: center; min-height: 1.3em; font-size: 0.72rem; letter-spacing: 0.04em; }
-.hud__chips { display: flex; gap: 4px; padding: 4px; border-radius: 999px; border: 1px solid var(--line); background: rgba(13, 13, 22, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-.chip { font-family: var(--body); font-size: 0.82rem; font-weight: 600; color: var(--muted); background: transparent; border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; transition: color .3s, background .3s; }
-.chip:hover { color: var(--fg); }
-.chip.is-active { color: var(--ink); background: var(--fg); }
-.chip[disabled] { opacity: 0.35; cursor: progress; }
-.hud__hint { margin: 0; color: var(--muted); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; }
-@media (max-height: 700px) and (min-width: 761px) { .hud__hint { display: none; } .hero__copy { gap: 16px; } }
+.hero__stage { grid-area: stage; position: relative; margin: 0; min-height: 0; }
+/* The canvas spills past its cell so the outer comet is never cut off; the hero clips it. */
+.hero__canvas { position: absolute; left: -12%; top: -8%; width: 124%; height: 116%; display: block; touch-action: pan-y; }
+.orbit__caption { position: absolute; left: 0; right: 0; top: 9%; z-index: 1; margin: 0; text-align: center; pointer-events: none;
+  font-family: var(--serif); font-style: italic; font-size: clamp(1.05rem, 1.45vw, 1.35rem); color: var(--muted); }
+.hero__cue { position: absolute; left: 50%; bottom: 20px; z-index: 2; transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px;
+  color: var(--muted); font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; pointer-events: none; }
+.hero__cue i { width: 1px; height: 28px; background: linear-gradient(var(--muted), transparent); animation: cue 2.4s var(--ease) infinite; }
+@keyframes cue { 0% { transform: scaleY(0); transform-origin: top; } 45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
-/* Phones and portrait tablets: headline on top, the mug under it, the switch at the foot. */
+/* Without WebGL (and with ?nogl): the old site's planet, flat. */
+.orbit-flat { display: none; position: absolute; left: 50%; top: 52%; width: min(100%, 74vh, 520px); aspect-ratio: 1; transform: translate(-50%, -50%); }
+.no-webgl .orbit-flat { display: block; }
+.no-webgl .hero__canvas { display: none; }
+.orbit-flat__planet { position: absolute; inset: 30%; border-radius: 50%;
+  background: radial-gradient(circle at 30% 27%, #ede9ff, #a69afb 22%, #6655c6 50%, #25204e 88%);
+  box-shadow: inset -22px -26px 38px rgba(9, 7, 58, 0.65), 0 0 80px rgba(105, 87, 232, 0.3); }
+.orbit-flat svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.orbit-flat circle { fill: none; stroke: #9d8cff; stroke-opacity: 0.2; }
+.orbit-flat text { fill: var(--fg); font: 400 17px var(--mono); letter-spacing: 5px; }
+.orbit-flat .orbit-flat__cloud { fill: #c4b8ff; font-size: 15px; letter-spacing: 3.5px; }
+
+/* Phones and portrait tablets: the headline on top, the planet under it. */
 @media (max-width: 760px), (max-width: 1024px) and (max-aspect-ratio: 5/6) {
-  .hud { grid-template-columns: minmax(0, 1fr); grid-template-rows: 86px auto minmax(150px, 1fr) auto; grid-template-areas: "." "copy" "stage" "switch";
-    padding: 0 var(--gutter) 24px; row-gap: 6px; }
+  .hero__inner { grid-template-columns: minmax(0, 1fr); grid-template-rows: 84px auto minmax(220px, 1fr) 24px; grid-template-areas: "." "copy" "stage" ".";
+    padding: 0 var(--gutter); row-gap: 8px; }
   .hero__copy { align-self: start; gap: 14px; padding: 0; }
-  .hero__title, .hero__hello { font-size: clamp(2rem, 8.6vw, 3.4rem); max-width: none; }
-  .hud__thesis { font-size: 0.95rem; }
-  .hud__tr { display: none; }
-  .hud__hint { display: none; }
+  .hero__title, .hero__hello { font-size: clamp(2rem, 8.6vw, 3.4rem); }
+  .hero__thesis { font-size: 0.95rem; }
   .hero__where { display: none; }
-  .hud__frame i:nth-child(1), .hud__frame i:nth-child(2) { top: 72px; }
-  .hud__frame i:nth-child(3), .hud__frame i:nth-child(4) { bottom: 14px; }
-  .hud__switch { padding-top: 0; gap: 10px; }
-  .chip { padding: 8px 12px; font-size: 0.78rem; }
+  .orbit__caption { top: 2%; font-size: 1rem; }
+  .hero__cue { display: none; }
 }
-@media (max-width: 760px) and (max-height: 740px) { .hud__thesis { display: none; } }
+@media (max-width: 760px) and (max-height: 740px) { .hero__thesis { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero__cue i { animation: none; } }
 
 /* ---------- Stats ---------- */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; padding-block: 72px; border-top: 1px solid var(--line); }
@@ -217,23 +217,29 @@ section { position: relative; }
 .section-title em { font-size: 1.12em; letter-spacing: -0.01em; color: var(--signal); }
 .section-sub { max-width: 58ch; color: var(--muted); font-size: 1.05rem; margin: 1.6rem 0 0; }
 
-/* ---------- Projects (stacking cards) ---------- */
+/* ---------- Projects (a deck of cards) ---------- */
+/* On a wide screen the cards stack like a deck (main.ts): each sticks a little lower than the
+   last, so the ones you have passed show as edges above it. The padding under a card is a
+   short hold with the whole card in view while the next one is already rising into sight; it
+   used to be 45vh with nothing moving, and on 2026-10-02 Omer said the deck stalled and then
+   went dark all at once. */
 .projects { display: grid; gap: 0; padding-inline: var(--gutter); max-width: calc(var(--maxw) + 2 * var(--gutter)); margin-inline: auto; }
-/* The padding is the dwell: how far you scroll with a card fully in view before the next one
-   arrives. main.ts sets each card's sticky top so tall cards stop with their bottom on screen. */
-.project { position: sticky; top: 88px; padding-bottom: 45vh; }
+.project { position: sticky; top: 88px; padding-bottom: 16vh; }
 .project:last-child { padding-bottom: 40px; }
-.project__card { position: relative; display: grid; grid-template-columns: 1fr 1.05fr; min-height: min(78vh, 720px); border-radius: 28px; overflow: hidden;
+.project__card { position: relative; display: grid; grid-template-columns: 1fr 1.05fr; min-height: min(70vh, 640px); border-radius: 28px; overflow: hidden;
   background: radial-gradient(120% 120% at 100% 0%, var(--pc2), var(--ink-2) 60%); border: 1px solid var(--line);
   box-shadow: 0 -20px 60px rgba(0,0,0,0.5); transform-origin: center top; will-change: transform; }
-.project__info { padding: clamp(24px, 4vw, 56px); display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+/* Dims a card as the next one covers it. Its own layer, faded by opacity alone: the old
+   brightness() filter repainted the whole card, art and all, on every frame of the scroll. */
+.project__shade { position: absolute; inset: 0; z-index: 6; border-radius: inherit; background: var(--ink); opacity: 0; pointer-events: none; will-change: opacity; }
+.project__info { padding: clamp(24px, 3.4vw, 46px); display: flex; flex-direction: column; gap: 0.85rem; min-width: 0; }
 .project__top { display: flex; justify-content: space-between; gap: 1rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; flex-wrap: wrap; }
 .project__top span:first-child { color: var(--pc); }
-.project__name { font-family: var(--display); font-weight: 800; font-size: clamp(2.6rem, 5.5vw, 5rem); line-height: 0.95; letter-spacing: -0.04em; margin: 0.6rem 0 0; }
+.project__name { font-family: var(--display); font-weight: 800; font-size: clamp(2.4rem, 4.6vw, 4.2rem); line-height: 0.95; letter-spacing: -0.04em; margin: 0.4rem 0 0; }
 .project__name em { color: var(--pc); }
 .project__pitch { font-family: var(--serif); font-style: italic; font-size: clamp(1.3rem, 2vw, 1.7rem); line-height: 1.2; margin: 0; color: var(--pc); }
 .project__desc { color: #c3c0d4; margin: 0; max-width: 56ch; }
-.project__bullets { list-style: none; padding: 0; margin: 0.2rem 0 0; display: grid; gap: 0.55rem; font-size: 0.93rem; color: #b3b0c6; }
+.project__bullets { list-style: none; padding: 0; margin: 0.1rem 0 0; display: grid; gap: 0.45rem; font-size: 0.9rem; color: #b3b0c6; }
 .project__bullets li { display: grid; grid-template-columns: 14px 1fr; gap: 0.6rem; }
 .project__bullets li::before { content: ""; width: 6px; height: 6px; margin-top: 0.62em; border-radius: 50%; background: var(--pc); }
 .project__stack { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.8rem; }
@@ -242,6 +248,16 @@ section { position: relative; }
 .project .btn--solid { background: var(--pc); border-color: var(--pc); color: #07070c; }
 .project .btn--solid:hover { background: var(--fg); border-color: var(--fg); }
 .project__art { position: relative; overflow: hidden; min-height: 360px; border-left: 1px solid var(--line); }
+/* A laptop with a short window (1280×720 is common): tighter type, so more of each card fits
+   and fewer have to stick with their top above the window. */
+@media (min-width: 961px) and (max-height: 820px) {
+  .project__info { padding: 30px 36px; gap: 0.7rem; }
+  .project__name { font-size: clamp(2.2rem, 3.9vw, 3.5rem); }
+  .project__pitch { font-size: clamp(1.15rem, 1.7vw, 1.45rem); }
+  .project__desc { font-size: 0.93rem; line-height: 1.55; }
+  .project__bullets { font-size: 0.85rem; gap: 0.35rem; }
+  .project__stack { padding-top: 0.4rem; }
+}
 @media (max-width: 960px) {
   .project, .project:last-child { position: relative; top: 0; padding-bottom: 40px; }
   .project__card { grid-template-columns: 1fr; min-height: 0; }
@@ -828,6 +844,3 @@ section { position: relative; }
   .gb-launch { min-height: 48px; padding: 0 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .gb-launch__pulse, .gb-panel { animation: none; } .gb, .gb.is-away { transition: none; } }
-.chip--beat span { color: #3DD6F5; }
-.chip--beat.is-active { background: linear-gradient(90deg, #00D4FF, #EC4899); color: #07050A; border-color: transparent; }
-.chip--beat.is-active span { color: #07050A; }

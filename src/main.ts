@@ -65,7 +65,7 @@ $$<HTMLAnchorElement>('a[href^="#"]').forEach((a) => {
 initSky({ reduced });
 
 /* ---------- WebGL ---------- */
-initHeroSection({ data, reduced, lenis }).then(() => { ScrollTrigger.sort(); ScrollTrigger.refresh(); });
+initHeroSection({ reduced, lenis }).then(() => { ScrollTrigger.sort(); ScrollTrigger.refresh(); });
 const systems = initSystems($('#systems'), reduced);
 $$<HTMLAnchorElement>('[data-flow]').forEach((a) => a.addEventListener('click', () => systems.select(a.dataset.flow!)));
 
@@ -425,32 +425,41 @@ if (!reduced) {
   const skewTo = gsap.quickTo('.marquee__track', 'skewX', { duration: 0.4, ease: 'power3' });
   ScrollTrigger.create({ onUpdate: (st) => skewTo(gsap.utils.clamp(-12, 12, st.getVelocity() / -250)) });
 
-  // Stacked project cards. Each card sticks where its whole face is on screen (a card taller
-  // than the window sticks with its bottom in view, so the links are never hidden), holds
-  // still for the dwell in .project's padding, and only then does the next card slide over it
-  // and it shrinks and dims. Dimming used to start as soon as the card arrived, and the next
-  // card covered its bottom before anyone could read it.
+  // The project deck (style.css, "Projects"). Each card sticks 14px lower than the one before,
+  // so the ones you have passed show as a fan of edges; a card taller than the window sticks
+  // with its bottom in view instead, so its links are never hidden. As the next card rises over
+  // it, a card sinks back a little and dims, continuously, from the moment its bottom starts
+  // being covered until the next card lands: no hold with nothing moving, no sudden dark.
   const cards = $$('.project');
   const mm = gsap.matchMedia();
   mm.add('(min-width: 961px)', () => {
-    const top = (c: HTMLElement) => Math.min(88, window.innerHeight - $('.project__card', c).offsetHeight - 20);
-    const place = () => cards.forEach((c) => { c.style.top = `${top(c)}px`; });
+    const top = (c: HTMLElement, i: number) => Math.min(88 + i * 14, window.innerHeight - $('.project__card', c).offsetHeight - 20);
+    const place = () => cards.forEach((c, i) => { c.style.top = `${top(c, i)}px`; });
     place();
     ScrollTrigger.addEventListener('refreshInit', place);
+    const shades = cards.map((c) => {
+      const shade = document.createElement('i');
+      shade.className = 'project__shade';
+      $('.project__card', c).append(shade);
+      return shade;
+    });
     cards.forEach((card, i) => {
       if (i === cards.length - 1) return;
-      gsap.to($('.project__card', card), {
-        scale: 0.92, filter: 'brightness(0.3)', ease: 'none',
+      const face = $('.project__card', card);
+      gsap.timeline({
         scrollTrigger: {
           trigger: cards[i + 1], scrub: true, invalidateOnRefresh: true,
-          start: () => `top ${top(card) + $('.project__card', card).offsetHeight}px`,
-          end: () => `top ${top(cards[i + 1])}px`,
+          start: () => `top ${top(card, i) + face.offsetHeight}px`,
+          end: () => `top ${top(cards[i + 1], i + 1)}px`,
         },
-      });
+      })
+        .to(face, { scale: 0.94, ease: 'none' }, 0)
+        .to(shades[i], { opacity: 0.6, ease: 'power1.in' }, 0);
     });
     return () => {
       ScrollTrigger.removeEventListener('refreshInit', place);
       cards.forEach((c) => { c.style.top = ''; });
+      shades.forEach((sh) => sh.remove());
     };
   });
   cards.forEach((card) => {

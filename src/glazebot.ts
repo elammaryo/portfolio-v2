@@ -66,8 +66,8 @@ export function initGlazeBot(reduced: boolean) {
   $<HTMLButtonElement>('.gb-close').addEventListener('click', () => open(false));
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) open(false); });
 
-  // Out of the way on the first screen: the hero has its own controls in that corner on a
-  // phone, and the headline should land before anything asks to chat. The launcher slides in
+  // Out of the way on the first screen: the headline should land before anything asks to
+  // chat. The launcher slides in
   // once the page scrolls, and the first time it does, its label opens for a few seconds
   // (the old site's tease), once per visit.
   let teased = false;
