@@ -14,6 +14,8 @@
   --serif: "Instrument Serif", "Times New Roman", Georgia, serif;
   --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* GameOver's arcade face, for its card only. */
+  --pixel: "Silkscreen", "JetBrains Mono", ui-monospace, monospace;
   --gutter: clamp(16px, 4vw, 56px);
   --maxw: 1320px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -54,7 +56,7 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 
 /* ---------- Sky: stars, the odd meteor, a shower at the end (sky.ts) ---------- */
 .sky { position: fixed; left: 0; top: 0; width: 100%; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; overflow: hidden; }
-.sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sky canvas, .sky__tws { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sky__tw { position: absolute; width: 2px; height: 2px; margin: -1px 0 0 -1px; border-radius: 50%; background: #fff;
   box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.45); opacity: 0.25; animation: twinkle var(--d, 4s) ease-in-out var(--dl, 0s) infinite alternate; }
 @keyframes twinkle { to { opacity: 0.9; } }
@@ -126,7 +128,8 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
    it sits is decided here, per width. Nothing else lives in the hero: it used to carry commit
    counts, shape chips and hints, and on 2026-10-02 Omer asked for it to breathe. */
 .hero { position: relative; height: 100svh; min-height: 600px; overflow: hidden; }
-.hero__inner { position: absolute; inset: 0; z-index: 2; color: var(--fg);
+/* Clicks pass through to the planet's canvas underneath, except on the links and buttons. */
+.hero__inner { position: absolute; inset: 0; z-index: 2; color: var(--fg); pointer-events: none;
   display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); grid-template-rows: 104px minmax(0, 1fr) 64px;
   grid-template-areas: ". ." "copy stage" ". ."; column-gap: clamp(16px, 3vw, 48px);
   padding: 0 calc(var(--gutter) + 34px); }
@@ -156,9 +159,10 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .hero__ctas { display: flex; gap: 8px; flex-wrap: wrap; }
 .hero__ctas .btn { padding: 11px 20px; font-size: 0.86rem; }
 
+.hero__inner a, .hero__inner button { pointer-events: auto; }
+
 .hero__stage { grid-area: stage; position: relative; margin: 0; min-height: 0; }
-/* The canvas spills past its cell so the outer comet is never cut off; the hero clips it. */
-.hero__canvas { position: absolute; left: -12%; top: -8%; width: 124%; height: 116%; display: block; touch-action: pan-y; }
+.hero__canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; display: block; touch-action: pan-y; }
 .orbit__caption { position: absolute; left: 0; right: 0; top: 9%; z-index: 1; margin: 0; text-align: center; pointer-events: none;
   font-family: var(--serif); font-style: italic; font-size: clamp(1.05rem, 1.45vw, 1.35rem); color: var(--muted); }
 .hero__cue { position: absolute; left: 50%; bottom: 20px; z-index: 2; transform: translateX(-50%); margin: 0; display: grid; justify-items: center; gap: 8px;
@@ -368,43 +372,66 @@ section { position: relative; }
 .at-foot .mono { color: var(--soft); font-size: .56rem; text-align: right; }
 @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
 
-/* GameOver art */
-.art-gameover { background: #07050A; display: grid; place-items: center; }
-.go-aurora { position: absolute; inset: -30%; background:
-  radial-gradient(40% 35% at 30% 40%, rgba(0,212,255,0.55), transparent 70%),
-  radial-gradient(35% 30% at 70% 55%, rgba(236,72,153,0.5), transparent 70%),
-  radial-gradient(40% 40% at 50% 70%, rgba(168,85,247,0.55), transparent 70%); filter: blur(30px); animation: aurora 14s ease-in-out infinite alternate; }
-@keyframes aurora { 0% { transform: translate(0,0) rotate(0); } 50% { transform: translate(5%,-4%) rotate(20deg); } 100% { transform: translate(-6%,3%) rotate(-10deg); } }
-.go-logo { position: relative; width: 110px; margin-bottom: 150px; filter: drop-shadow(0 0 30px rgba(0,212,255,0.6)); }
-.go-wave { position: absolute; left: 8%; right: 8%; top: 52%; height: 90px; display: flex; align-items: center; gap: 3px; }
-.go-wave span { flex: 1; border-radius: 2px; background: linear-gradient(#00D4FF, #EC4899); transform-origin: center; }
-.go-player { position: absolute; left: 8%; right: 8%; bottom: 12%; display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; background: rgba(7,5,10,0.75); border: 1px solid rgba(255,255,255,0.12); color: #d9d4ee; }
-.go-play { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #07050A; flex: none; }
-.go-time { margin-left: auto; color: var(--muted); }
-/* GameOver's easter egg (src/eggs/gameover.ts): the player plays. */
-.go-player.is-live { padding: 12px 16px 17px; }
-.go-player.is-live .go-play { border: 0; cursor: pointer; font-size: .72rem; transition: transform .2s; }
-.go-player.is-live .go-play:hover { transform: scale(1.08); }
+/* GameOver art: its title screen in miniature (src/eggs/gameover.ts). Ink, bone text, the
+   title's cyan → violet → magenta and Silkscreen for the arcade bits, as on gameover.studio. */
+.art-gameover { --go-ink: #07060a; --go-bone: #f3f0ea; --go-dim: #8a8592; --go-cyan: #00D4FF; --go-pink: #EC4899;
+  background: var(--go-ink); display: grid; place-items: center; container-type: size; }
+/* The LED wall, faded out downward like the site's (its mask runs from 30% to 88%). */
+.go-leds { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .62;
+  -webkit-mask-image: linear-gradient(to bottom, #000 30%, transparent 88%); mask-image: linear-gradient(to bottom, #000 30%, transparent 88%); }
+.go-hud { position: absolute; top: 22px; left: 24px; right: 24px; display: flex; justify-content: space-between; font: 400 10px/1 var(--pixel); letter-spacing: .22em; text-transform: uppercase; color: #a29dab;
+  text-shadow: 0 0 3px var(--go-ink), 0 0 8px var(--go-ink), 0 0 14px var(--go-ink); }
+.go-hud b { font-weight: 400; color: var(--go-cyan); }
+.go-hud .go-hud-bpm { color: var(--go-pink); }
+.go-screen { position: relative; display: flex; flex-direction: column; align-items: center; margin-bottom: 96px; perspective: 600px; }
+/* A soft pool of ink under the title keeps it legible when the wall lights up behind it. */
+.go-screen::before { content: ""; position: absolute; inset: 18% -18% -22%; z-index: -1; background: radial-gradient(closest-side, rgba(7,6,10,.78), rgba(7,6,10,.4) 60%, transparent); }
+/* The chrome G floats, leans toward the pointer (--lx, --ly from the script), bounces on the
+   kick and flips like a coin (a Web Animation on transform, which these don't touch). */
+/* Sized by the art's width and its height: a tablet's art is wide and only 380px tall. */
+.go-g { width: clamp(64px, min(19cqi, 22cqb), 124px); height: auto; animation: goFloat 5s ease-in-out infinite;
+  rotate: calc(var(--ly, 0) * -1) var(--lx, 0) 0 calc(var(--la, 0) * 1deg); scale: calc(1 + var(--kick, 0) * .07); transition: rotate .4s var(--ease);
+  filter: drop-shadow(0 0 18px rgba(25,228,249,.3)) drop-shadow(0 10px 26px rgba(200,58,222,.32)); }
+@keyframes goFloat { 50% { translate: 0 -6px; } }
+.go-wordmark { display: block; width: min(72cqi, 340px); height: auto; margin-top: clamp(10px, 3cqi, 18px); }
+.go-tag { margin-top: clamp(8px, 2.4cqi, 14px); font: 700 clamp(.66rem, 2.3cqi, .88rem)/1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--go-bone); }
+.go-genres { display: flex; align-items: center; gap: 10px; margin: clamp(8px, 2.2cqi, 13px) 0 0; font: 400 10px/1 var(--pixel); letter-spacing: .3em; text-transform: uppercase; color: #b1acb7; }
+.go-genres i { width: 5px; height: 5px; border-radius: 1px; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.go-start { position: absolute; bottom: calc(10% + 78px); margin: 0; font: 400 11px/1 var(--pixel); letter-spacing: .4em; padding-left: .4em; text-transform: uppercase; color: var(--go-cyan);
+  animation: goBlink 1.1s steps(2, jump-none) infinite; transition: opacity .3s; }
+/* (The blink animates opacity, which would win over a plain declaration, so it stops too.) */
+.art-gameover.is-playing .go-start { animation: none; opacity: 0; }
+@keyframes goBlink { 50% { opacity: 0; } }
+.go-player { position: absolute; left: 24px; right: 24px; bottom: 10%; display: flex; align-items: center; gap: 12px; padding: 10px 16px 10px 10px; border-radius: 16px;
+  background: rgba(12,11,16,.82); border: 1px solid rgba(255,255,255,.1); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--go-dim); box-shadow: 0 14px 34px rgba(0,0,0,.45); }
+.go-play { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none; padding: 0; background: var(--go-cyan); color: var(--go-ink);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.3), inset 0 -3px 0 rgba(0,0,0,.18), 0 0 20px rgba(0,212,255,.4); }
+.go-play svg { width: 15px; height: 15px; fill: currentColor; }
 .go-title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.go-title b { color: #fff; font-weight: 600; }
-.go-title span { color: var(--muted); }
-.go-time { white-space: nowrap; }
-.go-next { flex: none; border: 0; background: none; color: #d9d4ee; cursor: pointer; font-size: .9rem; padding: 4px; }
-.go-seek { position: absolute; left: 16px; right: 16px; bottom: 7px; height: 3px; border-radius: 2px; background: rgba(255,255,255,.12); cursor: pointer; }
+.go-title b { color: var(--go-bone); font-weight: 600; }
+.go-title span { color: var(--go-dim); }
+.go-time { margin-left: auto; white-space: nowrap; color: var(--go-dim); font-variant-numeric: tabular-nums; }
+/* The egg (src/eggs/gameover.ts): the player plays. */
+.go-player.is-live { padding: 10px 14px 17px 10px; }
+.go-player.is-live .go-play { border: 0; cursor: pointer; transition: transform .2s; }
+.go-player.is-live .go-play:hover { transform: scale(1.08); }
+.art-gameover.is-playing .go-play { box-shadow: inset 0 0 0 1px rgba(255,255,255,.3), inset 0 -3px 0 rgba(0,0,0,.18), 0 0 calc(20px + var(--kick, 0) * 16px) rgba(0,212,255,.6); }
+.go-next { flex: none; border: 0; background: none; color: var(--go-dim); cursor: pointer; padding: 6px; display: grid; place-items: center; transition: color .2s; }
+.go-next:hover { color: var(--go-bone); }
+.go-next svg { width: 15px; height: 15px; fill: currentColor; }
+.go-seek { position: absolute; left: 58px; right: 16px; bottom: 7px; height: 3px; border-radius: 2px; background: rgba(255,255,255,.1); cursor: pointer; }
 .go-seek::before { content: ""; position: absolute; inset: -8px 0; }
-.go-seek i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #00D4FF, #EC4899); }
-/* Softer since the real beats: their bass moves and every kick registers (audio.ts). */
-.go-aurora { scale: calc(1 + var(--pulse, 0) * .06); }
-.go-logo { scale: calc(1 + var(--kick, 0) * .07); transition: filter .2s; }
-.art-gameover.is-playing .go-logo { filter: drop-shadow(0 0 calc(30px + var(--kick, 0) * 26px) rgba(0,212,255,.75)); }
-.art-gameover.is-playing .go-wave span { transition: transform .06s linear; }
+.go-seek i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #19E4F9, #5A70DF, #C83ADE); }
 .np { position: fixed; left: max(18px, env(safe-area-inset-left)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 6px;
-  border-radius: 999px; background: rgba(7,5,10,.9); border: 1px solid rgba(61,214,245,.4); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: gbPop .4s cubic-bezier(.2,1.4,.3,1); }
+  border-radius: 999px; background: rgba(12,11,16,.9); border: 1px solid rgba(0,212,255,.35); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,.45); animation: gbPop .4s cubic-bezier(.2,1.4,.3,1); }
 .np[hidden] { display: none !important; }
-.np-toggle { width: 32px; height: 32px; flex: none; border-radius: 50%; border: 0; background: #fff; color: #07050A; cursor: pointer; font-size: .66rem; }
-.np-title { border: 0; background: none; color: #d9d4ee; font: 500 .8rem var(--body); cursor: pointer; max-width: min(46vw, 260px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0; }
+.np-toggle { width: 32px; height: 32px; flex: none; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 0; background: #00D4FF; color: #07060a; cursor: pointer; }
+.np-toggle svg { width: 13px; height: 13px; fill: currentColor; }
+.np-title { display: inline-flex; align-items: center; gap: 7px; min-width: 0; border: 0; background: none; color: #f3f0ea; font: 500 .8rem var(--body); cursor: pointer; max-width: min(46vw, 260px); padding: 0; }
+.np-title img { width: 18px; height: 18px; flex: none; }
+.np-title span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-eq { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
-.np-eq i { width: 3px; height: 100%; border-radius: 1px; background: linear-gradient(#00D4FF, #EC4899); transform-origin: bottom; animation: npEq .8s ease-in-out infinite alternate; }
+.np-eq i { width: 3px; height: 100%; border-radius: 1px; background: linear-gradient(#19E4F9, #C83ADE); transform-origin: bottom; animation: npEq .8s ease-in-out infinite alternate; }
 .np-eq i:nth-child(2) { animation-delay: -.3s; } .np-eq i:nth-child(3) { animation-delay: -.55s; }
 @keyframes npEq { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
 

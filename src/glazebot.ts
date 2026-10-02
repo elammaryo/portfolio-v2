@@ -75,7 +75,10 @@ export function initGlazeBot(reduced: boolean) {
   let away = true, raf = 0;
   const place = () => {
     raf = 0;
-    const nowAway = window.scrollY < window.innerHeight * 0.45 && panel.hidden !== false;
+    // Away until the hero's flight has landed: the section after the hero is well up the screen.
+    const next = document.getElementById('stats');
+    const early = next ? next.getBoundingClientRect().top > window.innerHeight * 0.55 : window.scrollY < window.innerHeight * 0.45;
+    const nowAway = early && panel.hidden !== false;
     if (nowAway === away) return;
     away = nowAway;
     root.classList.toggle('is-away', away);

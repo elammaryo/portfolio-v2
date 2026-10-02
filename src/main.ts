@@ -8,6 +8,7 @@ import '@fontsource/manrope/latin-600.css';
 import '@fontsource/manrope/latin-700.css';
 import '@fontsource/jetbrains-mono/latin-400.css';
 import '@fontsource/anton/latin-400.css';
+import '@fontsource/silkscreen/latin-400.css';
 import './style.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -22,7 +23,7 @@ import { initSuperOverEgg } from './eggs/superover';
 import { initAthenaEgg } from './eggs/athena';
 import { initBudgetEgg } from './eggs/budget';
 import { initGlazeBot } from './glazebot';
-import { initGameOverEgg } from './eggs/gameover';
+import { initGameOver } from './eggs/gameover';
 import { initSky } from './sky';
 import { drawClock, drawHeatmap, drawStack, fillTicker } from './charts';
 import { player } from './audio';
@@ -284,19 +285,8 @@ $('#factBusiestK').textContent = `commits on ${busiestDate.toLocaleDateString('e
 $('#factDays').textContent = String(data.stats.activeDays);
 $('#lastCommit').textContent = `Last commit: ${new Date(data.stats.last + 'T12:00:00').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' })}`;
 
-/* ---------- GameOver waveform ---------- */
-const wave = $('#goWave');
-const waveBars: HTMLElement[] = [];
-for (let i = 0; i < 48; i++) {
-  const s = document.createElement('span');
-  s.style.height = `${20 + Math.abs(Math.sin(i * 0.45)) * 70}%`;
-  wave.appendChild(s);
-  waveBars.push(s);
-}
-if (!reduced) {
-  waveBars.forEach((b, i) => gsap.to(b, { scaleY: 0.25, duration: 0.35 + (i % 5) * 0.08, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: i * 0.03 }));
-}
-initGameOverEgg($('.art-gameover'), waveBars, reduced);
+/* ---------- GameOver: the LED wall and the player (eggs/gameover.ts) ---------- */
+initGameOver($('.art-gameover'), reduced);
 
 /* ---------- Omer's clock in the nav ---------- */
 // Always Omer's time in Toronto, whoever is reading. The status is a guess from that clock,
@@ -323,13 +313,15 @@ setInterval(tick, 20000);
 const nav = $('#nav');
 const toTop = $<HTMLButtonElement>('#toTop');
 const toTopRing = $('#toTopRing');
+const stats = $('#stats');
 let lastY = 0;
 const onScroll = (y: number) => {
   nav.classList.toggle('is-scrolled', y > 40);
   nav.classList.toggle('is-hidden', y > lastY && y > 400);
   lastY = y;
-  // Once the hero is behind you; the ring is how far down the page you are.
-  toTop.classList.toggle('is-on', y > window.innerHeight * 1.1);
+  // Once the hero and its flight are behind you (the section after it is well up the screen);
+  // the ring is how far down the page you are.
+  toTop.classList.toggle('is-on', stats.getBoundingClientRect().top < window.innerHeight * 0.5);
   const max = document.documentElement.scrollHeight - window.innerHeight;
   toTopRing.style.strokeDashoffset = String(125.7 * (1 - (max > 0 ? Math.min(1, y / max) : 0)));
 };
@@ -479,8 +471,10 @@ if (!reduced) {
       y: 30, opacity: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out', scrollTrigger: { trigger: card, start: 'top 70%' },
     });
     // Easter-egg overlays (.egg-ui) are left out: a from-tween reads their resting opacity
-    // while their CSS transitions are mid-flight and can record 0, leaving them invisible.
-    gsap.from($$(':scope > :not(.egg-ui)', $('.project__art', card)), {
+    // while their CSS transitions are mid-flight and can record 0, leaving them invisible. So
+    // are full-bleed backgrounds (.art-bg, GameOver's LED wall), which would shrink from the
+    // card's edges.
+    gsap.from($$(':scope > :not(.egg-ui):not(.art-bg)', $('.project__art', card)), {
       scale: 0.85, opacity: 0, duration: 1.2, stagger: 0.1, ease: 'expo.out', scrollTrigger: { trigger: card, start: 'top 70%' },
     });
   });

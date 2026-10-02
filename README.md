@@ -43,20 +43,42 @@ while dawn comes round the planet's left limb (a crescent growing into the half-
 words write themselves round their rings, then the greeting lifts away and the headline rises
 word by word.
 
-Leaving the hero (Omer asked for motion there on 2026-10-02), everything is scrubbed to the
-scroll and nothing is pinned, so it plays backwards on the way up and never holds the page:
+Leaving the hero is a flight (Omer asked for motion there on 2026-10-02, then for a really
+cool, dynamic scroll transition with the planet and the stars, the way the old coffee hero's
+fly-through moved). The hero holds for 1.4 screens of scrolling (`FLIGHT` in `hero/index.ts`)
+while a sequence plays, scrubbed to the scroll: it runs backwards on the way up, and every bit
+of scroll moves something, so the hold never reads as the page stalling. In order (the phases
+overlap; `phase()` in `planet.ts` has the exact ranges):
 - The headline comes apart. Each word lifts at its own speed, turns a degree or two and fades;
   higher lines lift faster than lower ones, so the copy fans out upward and no line slides into
   another. This is armed only once the intro is over, because the intro animates some of the
-  same elements and a scrub created mid-intro would keep their half-faded values.
-- The planet leaves orbit: the camera pulls back and rises, so it falls away below you and its
-  rings open toward a view from above, while it sinks a little slower than the page.
-- Scroll speed winds the rings and comets up (`setScroll`'s second argument, px/s; a fast flick
-  is about four times their resting speed, and the comet tails stretch), and they coast down.
-- The stars streak with the scroll (see the sky, below).
+  same elements and a timeline built mid-intro would keep their half-faded values.
+- The planet glides out of its cell to the middle of the screen (the canvas covers the whole
+  hero; at rest a view offset frames the planet in its cell).
+- It spins up: the rings whirl and widen, the comets spiral out with long tails, the atmosphere
+  glows, and the stars come loose from the still sky and swirl round it, inner ones faster.
+- The camera swings round to the night side, and the planet wanes to a crescent with its lamps
+  on.
+- It dives. Height falls exponentially, so the approach is a steady rush rather than a lurch at
+  the end. The rings sweep out past the edges of the screen (the words go by huge) and fade
+  before the camera reaches them; the comets go out as it closes on their orbits; the planet
+  stops turning so the lamps rush straight up. The dive is aimed at a city: the towns spread
+  round the point it heads for, so lights come up from the middle of the screen wherever the
+  planet has turned to.
+- The canvas fades and the stars carry on at warp speed, rushing out from the middle, then ease
+  back into the still sky as the next section arrives.
+
+Two things the first cut got wrong: it flew a straight line from the front to the surface, so
+the lit limb filled the screen, and the lamps, sized by their grid cells, swelled into blurry
+orange squares up close. Lamps are now sized in screen pixels (from `fwidth`), with two finer
+octaves fading in once their cells are a few pixels across, so the lights multiply as they
+come up instead of swelling. A full-screen planet is the costliest frame, so the shader skips
+the band noise wherever there's no daylight to see it by (the night side is 3.5% of its colour
+there), and past the flight the canvas isn't drawn at all. Scroll speed adds to the whirl
+(`setFlight`'s second argument, px/s).
 
 Without WebGL, the old site's flat planet (CSS and an SVG `textPath`) takes the canvas's place.
-Reduced motion shows the formed scene, still, and none of the exit.
+Reduced motion shows the formed scene, still, with no hold and no flight: the hero scrolls away.
 
 Debug flags (append to the URL): `?still` starts with everything in place and no intro,
 `?nogl` forces the flat planet, `?slow=10` slows all animation, and `?debug` lets a test set
@@ -78,6 +100,14 @@ already moves a lot (the hero's planet, the beat pulse, the stacked cards):
 - Warp: while the page scrolls, the stars stretch into short streaks along the scroll, longer
   for the bigger ones and the faster you go (up to 24px), and settle back to points once it
   stops. The canvas is redrawn only while the page moves.
+- The hero's flight drives them too (`skyFlight(swirl, warp, x, y)`, from `hero/index.ts`).
+  They come loose from the still picture where they were drawn, swirl round the planet as it
+  spins up (each is turned about the planet's current position, so the vortex follows it to
+  the middle of the screen without the sky sliding along), then rush outward at warp speed,
+  each drawn as a streak of its last few hundredths of a second. A star that leaves the field
+  comes back anywhere in it, faint at first, as a far one would: brought back near the centre,
+  where stars move slowest, they piled into a bright knot. Both ease toward the scroll's values
+  at the same pace whatever the display's frame rate, and settle back into the still sky.
 
 The layer sits at `z-index: -1` behind everything. The hero is transparent, so the planet hangs
 in it; the cards cover it and the open stretches between them show it. That is why `body` has no background (it would paint over
@@ -89,7 +119,7 @@ streaks.
 
 ## Back to top
 A small round button (`#toTop`) in the bottom-right corner, centred above the chat launcher. It
-appears once the hero is behind you, and its ember ring fills as you go down the page. It glides
+appears once the hero and its flight are behind you (the stats are half way up the screen), and its ember ring fills as you go down the page. It glides
 to the top with Lenis and hands keyboard focus to the nav's monogram, since the button itself
 disappears. It steps aside while the chat panel or the phone menu is open (`body:has(...)`),
 since both cover that corner. The footer's "Back to top" link is still there at the end.
@@ -153,7 +183,19 @@ out of the card's reveal animation (a from-tween read their mid-transition opaci
   (card-processor noise and all), then tidy up the way the app does it: clean merchant name,
   a category from a rule, a subscription spotted, a friend's e-transfer matched to the dinner
   it settles. The forecast moves with each one.
-- `gameover.ts`: the player bar plays (see Audio); the waveform becomes a live spectrum.
+- `gameover.ts`: the card is gameover.studio's title screen in miniature, which Omer asked for
+  on 2026-10-02 after the site's refresh: the chrome G, the GAMEOVER title in its cyan-violet-
+  magenta (inline SVG from the repo's wordmark, minified), an arcade HUD and PRESS START in
+  Silkscreen, and behind them the LED wall. That is the site's `Backdrop.tsx` recipe (its old
+  aurora, sampled once per cell, five brightness steps, brightest at the top) on a 2D canvas at
+  30 fps: LEDs are drawn white in one path per step and coloured in one `source-in` pass, so a
+  frame is six fills however many are lit. It is drawn only while some of it can be seen, which
+  in the deck means above the next card's top. The player bar plays (see Audio): the wall pumps
+  with each kick and its lower edge follows the spectrum (bass on the left), the HUD follows the
+  beat and its BPM, and the G bounces on the kick and flips like a coin every four bars, as the
+  real one does (pointing at it flips it too). Clicks send rings through the wall. The pill
+  shows whenever the card's own controls are out of sight, covered by the next card included
+  (going by the card alone hid it all the way down the deck).
 
 `?debug` also exposes `__gd` (pitch) and `__so` (Super Over) for scripted tests.
 
@@ -195,8 +237,8 @@ the frame that hears it (it used to decay first and top out at 0.86, so the old 
 hero's kick shockwave, which waited for >0.95, never fired). Once bass and kicks really moved,
 that hero's response was too strong and Omer asked twice to turn it down; the planet that
 replaced it (2026-10-02) starts from that lesson, with a faint swell of the atmosphere and a
-small brightening of the words, and the card's logo and aurora pulse about half their first
-tuning.
+small brightening of the words, and on the card the G bounces 7% and the LED wall pumps on
+each kick.
 
 ## GlazeBot (`src/glazebot.ts`)
 The chat widget talks to the bot at `ai-chatbot-kcyl.onrender.com` (repo
@@ -206,9 +248,10 @@ says it's on mute rather than failing. Render's free tier sleeps: the widget pin
 when someone hovers the launcher, and says so if a cold start is slow.
 
 The launcher is the old site's: a glass tile with Lucide's bot icon, a pink dot, and a
-"GlazeBot AI" label that slides out on hover. It stays hidden on the first screen (so the
-headline lands before anything asks to chat) and slides in once the page scrolls; the first time, the label
-opens for a few seconds, once per visit.
+"GlazeBot AI" label that slides out on hover. It stays hidden through the hero and its flight
+(so the headline lands, and the flight plays, before anything asks to chat) and slides in once
+the section after the hero is up the screen; the first time, the label opens for a few
+seconds, once per visit.
 
 ## When I ship
 The rhythm section is computed from `commits.json`: commits by hour, the facts, a

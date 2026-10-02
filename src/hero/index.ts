@@ -3,7 +3,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type Lenis from 'lenis';
 import { createPlanet, type Planet } from './planet';
 import { player } from '../audio';
-import { meteorShower } from '../sky';
+import { meteorShower, skyFlight } from '../sky';
+
+/** How long the hero holds for its flight out, in screens of scrolling. */
+const FLIGHT = 1.4;
+const ss = (a: number, b: number, x: number) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
 
 const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => root.querySelector(s) as T;
 
@@ -35,18 +39,20 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
   const words = splitWords(title);
   const helloEl = $('#heroHello');
   const parts = ['.hero__who', '.hero__thesis', '.hero__ctas', '.orbit__caption', '.hero__cue'];
-  // Leaving the hero, the headline comes apart: each word lifts at its own speed and turns a
-  // little as it fades. Higher lines lift faster than lower ones, so the copy fans out upward
-  // and no line ever slides into another. Scrubbed to the scroll, so it plays backwards on the
-  // way up. Armed only once the intro is over, since the intro animates some of the same
-  // elements and the scrub would keep their mid-intro values.
+  // The first moments of the flight: the headline comes apart. Each word lifts at its own speed
+  // and turns a little as it fades; higher lines lift faster than lower ones, so the copy fans
+  // out upward and no line slides into another. A paused timeline that the pin below plays
+  // through its first 30%. Built only once the intro is over, since the intro animates some of
+  // the same elements and a timeline built mid-intro would keep their half-faded values.
+  let exit: gsap.core.Timeline | null = null;
+  let lastT = 0;
   const armExit = () => {
     if (reduced) return;
     const outer = [...title.querySelectorAll<HTMLElement>(':scope > .hero__w')];
     const tops = [...new Set(outer.map((w) => w.offsetTop))].sort((a, b) => a - b);
     const lift = outer.map((w, i) => 80 + (tops.length - 1 - tops.indexOf(w.offsetTop)) * 42 + (((i * 7) % 5) - 2) * 8);
     const top = 80 + tops.length * 42;
-    gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } })
+    exit = gsap.timeline({ paused: true })
       .to(outer, { y: (i) => -lift[i], rotation: (i) => ((i % 3) - 1) * 2.5, ease: 'none', duration: 1 }, 0)
       .to(outer, { opacity: 0, ease: 'power1.in', duration: 0.62 }, 0)
       .to('.hero__who', { y: -(top + 30), opacity: 0, ease: 'none', duration: 0.5 }, 0)
@@ -54,6 +60,7 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
       .to('.hero__ctas', { y: -24, opacity: 0, ease: 'none', duration: 0.55 }, 0)
       .to('.orbit__caption', { y: -16, opacity: 0, ease: 'none', duration: 0.3 }, 0)
       .to('.hero__cue', { opacity: 0, ease: 'none', duration: 0.2 }, 0);
+    exit.progress(Math.min(1, lastT / 0.3));
   };
 
   if (!reduced && !still) {
@@ -80,14 +87,31 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
     armExit();
   }
 
-  // ---------- scroll ----------
-  // The planet hears the whole way out of the hero: how far (it pulls away) and how fast (its
-  // rings whirl). Nothing is pinned: the old fly-through held the page still for most of a
-  // screen.
-  ScrollTrigger.create({
-    trigger: '#hero', start: 'top top', end: 'bottom top',
-    onUpdate: (st) => planet?.setScroll(st.progress, st.getVelocity()),
-  });
+  // ---------- the flight out ----------
+  // Scrolling down from the hero holds it for FLIGHT screens while a scrubbed sequence plays (it
+  // runs backwards on the way up): the headline comes apart, the planet glides to the middle and
+  // spins up while the stars swirl round it, the camera swings round to the night side and dives
+  // through the rings at the lamps as the stars go to warp, and the flight lands in the next
+  // section. Every scroll moves something, so the hold never reads as the page stalling.
+  // planet.ts and sky.ts have the details. Reduced motion skips all of it: no hold, the hero
+  // scrolls away.
+  if (!reduced) {
+    const flat = $('.orbit-flat');
+    const stage = $('.hero__stage');
+    ScrollTrigger.create({
+      trigger: '#hero', start: 'top top', end: () => `+=${Math.round(window.innerHeight * FLIGHT)}`,
+      pin: true, anticipatePin: 1, invalidateOnRefresh: true,
+      onUpdate: (st) => {
+        const t = (lastT = st.progress);
+        exit?.progress(Math.min(1, t / 0.3));
+        planet?.setFlight(t, st.getVelocity());
+        if (!planet) flat.style.opacity = String(1 - ss(0.3, 0.7, t));
+        const r = stage.getBoundingClientRect();
+        const c = planet?.centre() ?? { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+        skyFlight(ss(0.04, 0.42, t) * (1 - ss(0.62, 0.82, t)), ss(0.6, 0.82, t) * (1 - ss(0.93, 1, t)), c.x, c.y);
+      },
+    });
+  }
   return planet;
 }
 

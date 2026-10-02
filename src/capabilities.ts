@@ -12,7 +12,7 @@ const PROJECTS: Project[] = [
   { id: 'gameday', name: 'GameDay', color: '#ff4d6a', note: 'Independent venture' },
   { id: 'athena', name: 'Athena', color: '#b9a6ff', note: 'Personal AI' },
   { id: 'budget', name: 'Budget', color: '#f2c879', note: 'Personal finance' },
-  { id: 'gameover', name: 'GameOver', color: '#3dd6f5', note: 'Music platform' },
+  { id: 'gameover', name: 'GameOver', color: '#00d4ff', note: 'Music platform' },
   { id: 'glazebot', name: 'GlazeBot', color: '#f7b2c8', note: 'AI guide' },
   { id: 'skinopathy', name: 'Skinopathy', color: '#8fb3ff', note: 'Healthtech, 2023–25' },
   { id: 'cmic', name: 'CMiC', color: '#d9d5ea', note: 'Now' },
@@ -27,7 +27,7 @@ const ROWS: Row[] = [
   { id: 'web', name: 'Web front ends', cells: {
     gameday: 'A Next.js 16 booking site and the admin dashboard behind it: rosters, check-in, finances.',
     budget: 'An installable React app with 23 screens, charts and a what-if sandbox.',
-    gameover: 'A music site whose player keeps going between pages, over a WebGL aurora.',
+    gameover: 'A music site dressed as an arcade, whose player keeps going between pages over an LED-matrix aurora.',
     superover: 'The marketing site, with waitlists, host recruitment and SEO.',
     athena: 'An installable web app with voice input and a sheet-based interface.',
   } },

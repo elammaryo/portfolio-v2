@@ -4,7 +4,7 @@
 export const REPO_META: Record<string, { label: string; color: string; stack: string[] }> = {
   'super-over': { label: 'SuperOver app', color: '#1fd17a', stack: ['Flutter', 'Firebase'] },
   athena: { label: 'Athena', color: '#b9a6ff', stack: ['React', 'Node.js', 'Postgres'] },
-  gameover: { label: 'GameOver Studio', color: '#3dd6f5', stack: ['Next.js', 'React'] },
+  gameover: { label: 'GameOver Studio', color: '#00d4ff', stack: ['Next.js', 'React'] },
   'super-over-backend': { label: 'SuperOver API', color: '#9df5c6', stack: ['Firebase', 'Node.js'] },
   'budgeting-app': { label: 'Budget', color: '#f2c879', stack: ['React', 'Supabase', 'Postgres'] },
   'cosmic-portfolio': { label: 'Portfolio v1', color: '#8b7bff', stack: ['React'] },

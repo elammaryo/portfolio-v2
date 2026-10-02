@@ -27,6 +27,14 @@ let showerNow: ((force: boolean) => void) | null = null;
  */
 export const meteorShower = (force = false) => showerNow?.(force);
 
+let flightNow: ((swirl: number, warp: number, x: number, y: number) => void) | null = null;
+/**
+ * Drives the stars during the hero's flight: `swirl` and `warp` (0–1) about a centre in viewport
+ * pixels (the planet). Both back at 0 lets them settle into the still sky. Nothing under reduced
+ * motion.
+ */
+export const skyFlight = (swirl: number, warp: number, x: number, y: number) => flightNow?.(swirl, warp, x, y);
+
 // A seeded generator, so a resize redraws the same sky rather than a new one.
 const seeded = (seed: number) => () => {
   seed = (seed + 0x6d2b79f5) | 0;
@@ -55,11 +63,14 @@ export function initSky({ reduced }: { reduced: boolean }) {
       rgb: k < 0.12 ? '201,184,255' : k < 0.19 ? '255,214,170' : '237,235,245',
     };
   });
+  const tws = document.createElement('div');
+  tws.className = 'sky__tws';
+  sky.append(tws);
   for (let i = 0; i < TWINKLES; i++) {
     const t = document.createElement('i');
     t.className = 'sky__tw';
     t.style.cssText = `left:${(rand() * 100).toFixed(2)}%;top:${(rand() * 100).toFixed(2)}%;--d:${(2.5 + rand() * 4).toFixed(2)}s;--dl:-${(rand() * 6).toFixed(2)}s`;
-    sky.append(t);
+    tws.append(t);
   }
 
   let size = '', w = 0, h = 0, n = 0;
@@ -68,12 +79,13 @@ export function initSky({ reduced }: { reduced: boolean }) {
    * Draws the sky. `streak` (px, signed) stretches every star into a short line along the
    * scroll, longer for the bigger, nearer-looking stars: the warp while the page moves.
    */
-  const paint = (streak = 0) => {
+  const paint = (streak = 0, still = 1) => {
     if (!g || !w || !h) return;
     const dpr = canvas.width / w;
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.clearRect(0, 0, w, h);
     g.lineCap = 'round';
+    g.globalAlpha = still;
     for (let i = 0; i < n; i++) {
       const s = pool[i], x = s.u * w, y = s.v * h;
       if (streak) {
@@ -90,6 +102,7 @@ export function initSky({ reduced }: { reduced: boolean }) {
       g.fillStyle = `rgba(${s.rgb},${s.a.toFixed(3)})`;
       g.beginPath(); g.arc(x, y, s.r, 0, Math.PI * 2); g.fill();
     }
+    g.globalAlpha = 1;
   };
   const draw = () => {
     // The layer is 100lvh tall, so a phone's address bar coming and going doesn't resize it.
@@ -118,17 +131,90 @@ export function initSky({ reduced }: { reduced: boolean }) {
     vel += (v - vel) * 0.3;
     // Settled: slow enough, and no scroll for a moment (the first frame after a scroll event
     // reads no movement yet, so speed alone would stop it at once).
+    if (flying) { warping = false; return; }
     if (Math.abs(vel) < 0.03 && t - lastScroll > 150) { vel = 0; warping = false; paint(); return; }
     paint(Math.max(-24, Math.min(24, vel * 7)));
     requestAnimationFrame(warp);
   };
   window.addEventListener('scroll', () => {
     lastScroll = performance.now();
-    if (warping || document.hidden) return;
+    if (warping || flying || document.hidden) return;
     warping = true;
     lastY = window.scrollY; lastT = lastScroll;
     requestAnimationFrame(warp);
   }, { passive: true });
+
+  // The flight out of the hero (hero/index.ts). The stars come loose from the still picture,
+  // starting exactly where they were drawn: they swirl round the planet as it winds up (inner
+  // ones faster, like a galaxy), then rush outward from it at warp speed as the camera dives,
+  // and ease back into the still sky as the next section arrives. Each star is moved about the
+  // planet's current position every frame, so when the planet glides to the middle of the
+  // screen the vortex follows it without the whole sky sliding along.
+  type Flyer = { x: number; y: number; px: number; py: number; z: number; r: number; a: number; rgb: string; age: number };
+  let flyers: Flyer[] = [];
+  let flying = false, lastF = 0;
+  const aim = { swirl: 0, warp: 0, x: 0, y: 0 };
+  const cur = { swirl: 0, warp: 0 };
+  const seed = () => {
+    flyers = [];
+    for (let i = 0; i < Math.min(pool.length, Math.max(n, 420)); i++) {
+      const s = pool[i], x = s.u * w, y = s.v * h;
+      flyers.push({ x, y, px: x, py: y, z: Math.min(1, 0.35 + (s.r - 0.35) * 0.75), r: s.r, a: s.a, rgb: s.rgb, age: 9 });
+    }
+  };
+  const fly = (t: number) => {
+    if (!g) return;
+    const dt = Math.min(0.05, Math.max(0.001, (t - lastF) / 1000));
+    lastF = t;
+    // Eased toward the scroll's values at the same pace whatever the display's frame rate.
+    cur.swirl += (aim.swirl - cur.swirl) * (1 - Math.pow(0.92, dt * 60));
+    cur.warp += (aim.warp - cur.warp) * (1 - Math.pow(0.93, dt * 60));
+    const live = Math.min(1, Math.max(cur.swirl, cur.warp) * 1.8);
+    if (live < 0.01 && !aim.swirl && !aim.warp) { flying = false; flyers = []; tws.style.opacity = ''; paint(); return; }
+    const R = Math.hypot(w, h) * 0.62;
+    const k = 0.05 + cur.warp * 0.06;
+    paint(0, 1 - live);
+    tws.style.opacity = String(1 - live);
+    g.lineCap = 'round';
+    for (const f of flyers) {
+      let dx = f.x - aim.x, dy = f.y - aim.y;
+      const r = Math.hypot(dx, dy) || 1;
+      // Swirl: turn about the planet, quicker near it.
+      const turn = cur.swirl * dt * (1.35 / (0.3 + r / R)) * (0.7 + f.z * 0.5);
+      const c = Math.cos(turn), sn = Math.sin(turn);
+      [dx, dy] = [dx * c - dy * sn, dx * sn + dy * c];
+      // Warp: rush outward, quicker the further out (things nearer the camera pass faster).
+      const grow = (cur.warp * dt * (r * 2.2 + 80) * (0.55 + f.z * 0.8)) / r;
+      dx *= 1 + grow; dy *= 1 + grow;
+      f.px = f.x; f.py = f.y;
+      f.x = aim.x + dx; f.y = aim.y + dy;
+      if (r > R) {
+        // Gone past the edge: a new star comes into view anywhere in the field, faint at first,
+        // as a far one would. (Brought back near the centre, they piled up into a bright knot
+        // there: a star moves slowest at the centre, so that is where they collect.)
+        const a = Math.random() * Math.PI * 2, rr = R * 0.9 * Math.sqrt(Math.random());
+        f.x = f.px = aim.x + Math.cos(a) * rr; f.y = f.py = aim.y + Math.sin(a) * rr;
+        f.age = 0;
+        continue;
+      }
+      f.age += dt;
+      // The streak is the star's last few hundredths of a second of travel.
+      const vx = (f.x - f.px) / dt, vy = (f.y - f.py) / dt;
+      g.globalAlpha = live * f.a * (0.55 + f.z * 0.45) * Math.min(1, f.age / 0.35);
+      g.strokeStyle = `rgb(${f.rgb})`;
+      g.lineWidth = f.r * (1.3 + cur.warp * 0.9);
+      g.beginPath(); g.moveTo(f.x - vx * k, f.y - vy * k); g.lineTo(f.x, f.y); g.stroke();
+    }
+    g.globalAlpha = 1;
+    requestAnimationFrame(fly);
+  };
+  flightNow = (swirl, warpv, x, y) => {
+    aim.swirl = swirl; aim.warp = warpv; aim.x = x; aim.y = y;
+    if ((swirl > 0 || warpv > 0) && !flying && !document.hidden) {
+      flying = true; seed(); lastF = performance.now();
+      requestAnimationFrame(fly);
+    }
+  };
 
   // A meteor falls right and down at about 35°, as on the old site, its bright head first and
   // the tail fading behind. It brightens as it goes and then is gone.
