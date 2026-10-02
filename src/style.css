@@ -280,9 +280,7 @@ section { position: relative; }
 .so-screen { position: absolute; left: 6.5%; right: 6.7%; top: 3.2%; bottom: 3.2%; border-radius: 12% / 5.8%; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .4s .25s; outline: none; touch-action: manipulation; }
 .so-screen.is-on { opacity: 1; pointer-events: auto; }
 .so-screen canvas { display: block; }
-.so-chip--play { left: auto; right: 9%; bottom: 4.5%; top: auto; cursor: pointer; font: inherit; font-size: .78rem; color: #07070c; background: #06BA63; border-color: #06BA63; box-shadow: 0 0 0 0 rgba(6,186,99,.5); animation: soPing 2.6s ease-out infinite; }
-.so-chip--play:hover { background: #7df0b2; }
-.so-egg { margin-right: 4px; padding: 2px 6px; border-radius: 999px; background: rgba(7,7,12,.85); color: #7df0b2; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
+.so-egg { margin-right: 2px; padding: 2px 6px; border-radius: 999px; background: rgba(7,7,12,.85); color: #7df0b2; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; }
 @keyframes soPing { 0% { box-shadow: 0 0 0 0 rgba(6,186,99,.55); } 70%, 100% { box-shadow: 0 0 0 14px rgba(6,186,99,0); } }
 .so-exit { position: absolute; right: 5%; top: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; border: 0;
   background: var(--fg); color: var(--ink); font-size: .78rem; font-weight: 600; cursor: pointer; z-index: 3; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
@@ -290,9 +288,20 @@ section { position: relative; }
 .so-exit:hover { background: #7df0b2; }
 .phone--a { left: 14%; top: 12%; transform: rotate(-8deg); }
 .phone--b { right: 12%; top: 22%; transform: rotate(6deg); }
-.so-chip { position: absolute; padding: 8px 12px; border-radius: 999px; background: rgba(7,7,12,0.8); border: 1px solid rgba(6,186,99,0.5); color: #7df0b2; backdrop-filter: blur(6px); }
-.so-chip--1 { left: 6%; bottom: 14%; }
-.so-chip--2 { right: 6%; top: 10%; }
+/* The two status chips and the game's button keep to the same margins, one height, and the two
+   at the bottom share a baseline (they sat at 14% and 4.5% and read as a stagger). The button
+   comes after .so-chip so its green wins: written before it, it lost the cascade and looked
+   like one more status chip. */
+.so-chip { position: absolute; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 13px; border-radius: 999px; white-space: nowrap;
+  background: rgba(7,7,12,0.8); border: 1px solid rgba(6,186,99,0.5); color: #7df0b2; backdrop-filter: blur(6px); }
+.so-chip--1 { left: 5%; bottom: 5%; }
+.so-chip--2 { right: 5%; top: 7%; }
+.so-chip--play { right: 5%; bottom: 5%; cursor: pointer; font: inherit; font-size: .78rem; color: #07070c; background: #06BA63; border-color: #06BA63;
+  box-shadow: 0 0 0 0 rgba(6,186,99,.5); animation: soPing 2.6s ease-out infinite; }
+.so-chip--play:hover { background: #7df0b2; border-color: #7df0b2; }
+/* A phone's card is too narrow for both at the bottom; the joined count is on the phone's own
+   screen anyway, so the button keeps the row. */
+@media (max-width: 480px) { .so-chip--1 { display: none; } }
 
 /* GameDay art */
 .art-gameday { background: radial-gradient(90% 80% at 50% 50%, rgba(224,51,79,0.2), transparent 70%); display: grid; place-items: center; }
@@ -789,6 +798,22 @@ section { position: relative; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
   .grain { display: none; }
 }
+
+/* ---------- Back to top ---------- */
+/* Small, in the corner above the chat launcher (centred on it), and only once the hero is
+   behind you. The ring fills as you go down the page. It steps aside while the chat or the
+   phone menu is open, since both cover that corner. */
+.totop { position: fixed; right: calc(max(18px, env(safe-area-inset-right)) + 5px); bottom: calc(max(18px, env(safe-area-inset-bottom)) + 66px); z-index: 59;
+  width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: rgba(13, 13, 22, 0.66); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--fg); font: 500 1rem/1 var(--body);
+  opacity: 0; transform: translateY(10px) scale(0.9); visibility: hidden; transition: opacity .35s, transform .5s var(--ease), background .3s, visibility 0s .5s; }
+.totop.is-on { opacity: 1; transform: none; visibility: visible; transition: opacity .35s, transform .5s var(--ease), background .3s, visibility 0s; }
+.totop:hover { background: rgba(157, 140, 255, 0.2); }
+.totop svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.totop__track { fill: none; stroke: rgba(237, 235, 245, 0.14); stroke-width: 1.5; }
+.totop__ring { fill: none; stroke: var(--ember); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 125.7; stroke-dashoffset: 125.7; }
+body:has(.gb.is-open) .totop, body:has(.mmenu:not([hidden])) .totop { opacity: 0; visibility: hidden; }
+@media (max-width: 600px) { .totop { right: calc(max(18px, env(safe-area-inset-right)) + 3px); bottom: calc(max(18px, env(safe-area-inset-bottom)) + 60px); } }
 
 /* ---------- GlazeBot (src/glazebot.ts) ---------- */
 .gb { position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 60; font-family: var(--body);

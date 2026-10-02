@@ -35,6 +35,27 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
   const words = splitWords(title);
   const helloEl = $('#heroHello');
   const parts = ['.hero__who', '.hero__thesis', '.hero__ctas', '.orbit__caption', '.hero__cue'];
+  // Leaving the hero, the headline comes apart: each word lifts at its own speed and turns a
+  // little as it fades. Higher lines lift faster than lower ones, so the copy fans out upward
+  // and no line ever slides into another. Scrubbed to the scroll, so it plays backwards on the
+  // way up. Armed only once the intro is over, since the intro animates some of the same
+  // elements and the scrub would keep their mid-intro values.
+  const armExit = () => {
+    if (reduced) return;
+    const outer = [...title.querySelectorAll<HTMLElement>(':scope > .hero__w')];
+    const tops = [...new Set(outer.map((w) => w.offsetTop))].sort((a, b) => a - b);
+    const lift = outer.map((w, i) => 80 + (tops.length - 1 - tops.indexOf(w.offsetTop)) * 42 + (((i * 7) % 5) - 2) * 8);
+    const top = 80 + tops.length * 42;
+    gsap.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } })
+      .to(outer, { y: (i) => -lift[i], rotation: (i) => ((i % 3) - 1) * 2.5, ease: 'none', duration: 1 }, 0)
+      .to(outer, { opacity: 0, ease: 'power1.in', duration: 0.62 }, 0)
+      .to('.hero__who', { y: -(top + 30), opacity: 0, ease: 'none', duration: 0.5 }, 0)
+      .to('.hero__thesis', { y: -48, opacity: 0, ease: 'none', duration: 0.55 }, 0)
+      .to('.hero__ctas', { y: -24, opacity: 0, ease: 'none', duration: 0.55 }, 0)
+      .to('.orbit__caption', { y: -16, opacity: 0, ease: 'none', duration: 0.3 }, 0)
+      .to('.hero__cue', { opacity: 0, ease: 'none', duration: 0.2 }, 0);
+  };
+
   if (!reduced && !still) {
     lenis?.stop();
     helloEl.hidden = false;
@@ -44,7 +65,7 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
     gsap.set(words, { yPercent: 110 });
     gsap.set('.nav > *', { opacity: 0, y: -16 });
     document.documentElement.classList.remove('intro-pending');
-    const tl = gsap.timeline({ onComplete: () => { title.classList.add('is-set'); lenis?.start(); } });
+    const tl = gsap.timeline({ onComplete: () => { title.classList.add('is-set'); lenis?.start(); armExit(); } });
     if (planet) tl.add(planet.intro(), 0);
     else tl.fromTo('.orbit-flat', { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 1.6, ease: 'power3.out' }, 0.3);
     tl.to(hello, { yPercent: 0, duration: 0.95, ease: 'expo.out', stagger: 0.09 }, 0.2)
@@ -56,22 +77,17 @@ export async function initHeroSection(opts: { reduced: boolean; lenis: Lenis | n
   } else {
     title.classList.add('is-set');
     document.documentElement.classList.remove('intro-pending');
+    armExit();
   }
 
   // ---------- scroll ----------
-  // Leaving the hero, the words lift away and the planet sinks a little slower than the page.
-  // Nothing is pinned: the old fly-through held the page still for most of a screen.
-  if (!reduced) {
-    const copy = $('.hero__copy');
-    ScrollTrigger.create({
-      trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true,
-      onUpdate: (st) => {
-        planet?.setScroll(st.progress);
-        copy.style.opacity = String(1 - Math.min(1, st.progress * 1.5));
-        copy.style.transform = `translateY(${-50 * st.progress}px)`;
-      },
-    });
-  }
+  // The planet hears the whole way out of the hero: how far (it pulls away) and how fast (its
+  // rings whirl). Nothing is pinned: the old fly-through held the page still for most of a
+  // screen.
+  ScrollTrigger.create({
+    trigger: '#hero', start: 'top top', end: 'bottom top',
+    onUpdate: (st) => planet?.setScroll(st.progress, st.getVelocity()),
+  });
   return planet;
 }
 

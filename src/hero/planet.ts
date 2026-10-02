@@ -361,19 +361,19 @@ export async function createPlanet(opts: Opts) {
   addComet(2.3, -0.16, -0.3, -0.2, 3.4, '#ffbf80', 1.1);
 
   // ---------- size ----------
-  let W = 1, H = 1;
+  let W = 1, H = 1, baseZ = 9;
   const resize = () => {
     W = canvas.clientWidth || 1; H = canvas.clientHeight || 1;
     renderer.setSize(W, H, false);
     camera.aspect = W / H;
     const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    camera.position.z = FIT / (t * Math.min(1, camera.aspect));
+    baseZ = FIT / (t * Math.min(1, camera.aspect));
     camera.updateProjectionMatrix();
     if (reduced) render();
   };
 
   // ---------- motion state ----------
-  let spin = 0, orbitT = 0, spinVel = 0, scroll = 0;
+  let spin = 0, orbitT = 0, spinVel = 0, scroll = 0, boost = 0;
   const tiltTo = { x: 0, y: 0 }, tiltNow = { x: 0, y: 0 };
   const sunrise = { t: opts.formed || reduced ? 1 : 0 };
   const light = () => {
@@ -392,22 +392,29 @@ export async function createPlanet(opts: Opts) {
   }
 
   const place = () => {
-    // Comets: the head at its angle, the tail laid back along the orbit.
+    // Comets: the head at its angle, the tail laid back along the orbit, and longer while the
+    // system is whirling.
+    const stretch = 1 + Math.min(2.5, boost * 14 + Math.abs(spinVel) * 20);
     comets.forEach((c) => {
       const a0 = c.phase + orbitT * c.speed;
       const arr = c.head.array as Float32Array;
       for (let i = 0; i < TAIL; i++) {
-        const a = a0 - Math.sign(c.speed) * (i / (TAIL - 1)) * c.tail;
+        const a = a0 - Math.sign(c.speed) * (i / (TAIL - 1)) * c.tail * stretch;
         arr[i * 3] = Math.cos(a) * c.r; arr[i * 3 + 1] = 0; arr[i * 3 + 2] = Math.sin(a) * c.r;
       }
       c.head.needsUpdate = true;
     });
     rings.forEach((r) => { r.spin.rotation.y = r.phase + orbitT * r.speed; });
     planet.rotation.y = spin;
-    system.rotation.x = tiltNow.x;
+    // Leaving orbit: scrolling out of the hero, the camera pulls back and rises, so the planet
+    // falls away below you and its rings open toward a view from above. It also sinks a little
+    // slower than the page, which reads as depth.
+    const pull = scroll <= 0.04 ? 0 : Math.min(1, (scroll - 0.04) / 0.96);
+    const ease = pull * pull * (3 - 2 * pull);
+    system.rotation.x = tiltNow.x + ease * 0.5;
     system.rotation.y = tiltNow.y;
-    // Scrolling away, the planet sinks a little slower than the page: depth, cheaply.
-    camera.position.y = scroll * 0.9;
+    system.rotation.z = -ease * 0.16;
+    camera.position.set(0, scroll * 0.9, baseZ * (1 + ease * 0.6));
     camera.lookAt(0, scroll * 0.9, 0);
   };
   function render() { place(); renderer.render(scene, camera); }
@@ -475,10 +482,13 @@ export async function createPlanet(opts: Opts) {
     if (document.hidden || !visible) return;
     frames++;
     // The planet turns once every two minutes or so; the words go round faster.
-    spin += dt * 0.05 + spinVel;
-    orbitT += dt + spinVel * 4;
+    // Scrolling winds the rings and comets up (boost, from setScroll), and they coast down.
+    spin += dt * 0.05 + spinVel + boost * 0.2;
+    orbitT += dt + spinVel * 4 + boost * 3;
     spinVel *= 0.95;
+    boost *= 0.93;
     if (Math.abs(spinVel) < 1e-5) spinVel = 0;
+    if (boost < 1e-4) boost = 0;
     tiltNow.x += (tiltTo.x - tiltNow.x) * 0.05;
     tiltNow.y += (tiltTo.y - tiltNow.y) * 0.05;
     // Music (the GameOver player): the atmosphere breathes with the bass and the words
@@ -506,7 +516,15 @@ export async function createPlanet(opts: Opts) {
         .to(comets.map((c) => c.U.uAlpha), { value: 1, duration: 0.8, ease: 'power2.out', stagger: 0.3 }, 1.9);
       return tl;
     },
-    /** 0 at the top of the page, 1 once the hero has scrolled away. */
-    setScroll(p: number) { scroll = p; if (reduced) render(); },
+    /**
+     * 0 at the top of the page, 1 once the hero has scrolled away; `v` is the scroll's speed in
+     * px/s, which whirls the rings (a fast flick about four times their resting speed).
+     */
+    setScroll(p: number, v = 0) {
+      // Reduced motion: the canvas simply scrolls with the page.
+      if (reduced) return;
+      scroll = p;
+      boost = Math.max(boost, Math.min(0.08, Math.abs(v) * 2.4e-5));
+    },
   };
 }

@@ -41,9 +41,22 @@ the words brighten a touch on each kick, kept faint as Omer asked of the old her
 `hero/index.ts` runs the intro: "Hey, I'm Omer Elammary." rises in the headline's own type
 while dawn comes round the planet's left limb (a crescent growing into the half-moon) and the
 words write themselves round their rings, then the greeting lifts away and the headline rises
-word by word. Leaving the hero, the copy lifts away and the planet sinks a little slower than
-the page. Nothing is pinned. Without WebGL, the old site's flat planet (CSS and an SVG
-`textPath`) takes the canvas's place. Reduced motion shows the formed scene, still.
+word by word.
+
+Leaving the hero (Omer asked for motion there on 2026-10-02), everything is scrubbed to the
+scroll and nothing is pinned, so it plays backwards on the way up and never holds the page:
+- The headline comes apart. Each word lifts at its own speed, turns a degree or two and fades;
+  higher lines lift faster than lower ones, so the copy fans out upward and no line slides into
+  another. This is armed only once the intro is over, because the intro animates some of the
+  same elements and a scrub created mid-intro would keep their half-faded values.
+- The planet leaves orbit: the camera pulls back and rises, so it falls away below you and its
+  rings open toward a view from above, while it sinks a little slower than the page.
+- Scroll speed winds the rings and comets up (`setScroll`'s second argument, px/s; a fast flick
+  is about four times their resting speed, and the comet tails stretch), and they coast down.
+- The stars streak with the scroll (see the sky, below).
+
+Without WebGL, the old site's flat planet (CSS and an SVG `textPath`) takes the canvas's place.
+Reduced motion shows the formed scene, still, and none of the exit.
 
 Debug flags (append to the URL): `?still` starts with everything in place and no intro,
 `?nogl` forces the flat planet, `?slow=10` slows all animation, and `?debug` lets a test set
@@ -62,13 +75,24 @@ already moves a lot (the hero's planet, the beat pulse, the stacked cards):
 - The shower is ten meteors in under three seconds as `#contact` arrives, at most once every
   20 s. A tap on the hero's planet calls one too (`meteorShower(true)`), waiting only for the
   last to clear.
+- Warp: while the page scrolls, the stars stretch into short streaks along the scroll, longer
+  for the bigger ones and the faster you go (up to 24px), and settle back to points once it
+  stops. The canvas is redrawn only while the page moves.
 
 The layer sits at `z-index: -1` behind everything. The hero is transparent, so the planet hangs
 in it; the cards cover it and the open stretches between them show it. That is why `body` has no background (it would paint over
 the layer) and the page colour lives on `html`; the rhythm section's band became a
 semi-transparent haze for the same reason. It is `100lvh` tall, so a phone's address bar coming
 and going doesn't resize it. Meteors are elements moved by the Web Animations API, transform
-and opacity only, so nothing redraws the stars. Reduced motion keeps the stars, still.
+and opacity only, so nothing redraws the stars. Reduced motion keeps the stars, still, with no
+streaks.
+
+## Back to top
+A small round button (`#toTop`) in the bottom-right corner, centred above the chat launcher. It
+appears once the hero is behind you, and its ember ring fills as you go down the page. It glides
+to the top with Lenis and hands keyboard focus to the nav's monogram, since the button itself
+disappears. It steps aside while the chat panel or the phone menu is open (`body:has(...)`),
+since both cover that corner. The footer's "Back to top" link is still there at the end.
 
 ## Projects
 On a wide screen the cards stack like a deck. Each card sticks 14px lower than the one before,
@@ -109,11 +133,15 @@ out of the card's reveal animation (a from-tween read their mid-transition opaci
   guards the right goal, saving shots near him more often than corners. Goals fill spots on
   the session ticket. Where the art is wide and short (tablets, stacked phones) the pitch
   shrinks and drops until the goal and keeper are clear of the ticket and hint.
-- `superover.ts`: an "Easter egg · Hit a six" chip. The right phone zooms in and becomes a
+- `superover.ts`: an "Easter egg · Hit a six" button. The right phone zooms in and becomes a
   six-ball bonus round with a target to chase, labelled as a game so nobody mistakes it for
   the app (which books pickup games). Timing decides six/four/runs/out; it ends pointing at
   the real app. Three ways out: the "Exit game" button above the phone, Escape, or a tap
-  beside the phone. The screen area of `so-2.webp` is x 29–417, y 29–871.
+  beside the phone. The screen area of `so-2.webp` is x 29–417, y 29–871. The button shares a
+  baseline and the art's margins with the "12/14 joined" chip opposite it (they sat at
+  different heights, and the button's green lost the cascade to `.so-chip`, so it looked like
+  another status chip); on a phone the joined chip steps aside, as the phone's own screen
+  shows the count.
 - `athena.ts`: one message, sorted. "Dentist Tuesday at 3, send Sam the deck by Friday, and
   I want to start running" types in, each phrase lights up in a colour, and a row lands for
   each: the calendar, a promise with a nudge before it's due, a goal with a first step. "Hand

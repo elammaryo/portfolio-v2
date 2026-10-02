@@ -62,23 +62,25 @@ export function initSky({ reduced }: { reduced: boolean }) {
     sky.append(t);
   }
 
-  let drawn = '';
-  const draw = () => {
-    // The layer is 100lvh tall, so a phone's address bar coming and going doesn't resize it.
-    const w = sky.clientWidth, h = sky.clientHeight;
-    if (!w || !h || drawn === `${w}x${h}`) return;
-    drawn = `${w}x${h}`;
-    // 1.5x is plenty for dots this small, and a full-window canvas at 2x is a 20 MB texture.
-    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    const g = canvas.getContext('2d');
-    if (!g) return;
-    g.scale(dpr, dpr);
-    const n = Math.min(pool.length, Math.round((w * h) / STAR_AREA));
+  let size = '', w = 0, h = 0, n = 0;
+  const g = canvas.getContext('2d');
+  /**
+   * Draws the sky. `streak` (px, signed) stretches every star into a short line along the
+   * scroll, longer for the bigger, nearer-looking stars: the warp while the page moves.
+   */
+  const paint = (streak = 0) => {
+    if (!g || !w || !h) return;
+    const dpr = canvas.width / w;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    g.lineCap = 'round';
     for (let i = 0; i < n; i++) {
       const s = pool[i], x = s.u * w, y = s.v * h;
-      if (s.halo) {
+      if (streak) {
+        g.strokeStyle = `rgba(${s.rgb},${(s.a * 0.7).toFixed(3)})`;
+        g.lineWidth = s.r * 1.6;
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + streak * (0.35 + s.r * 0.6)); g.stroke();
+      } else if (s.halo) {
         const glow = g.createRadialGradient(x, y, 0, x, y, s.r * 6);
         glow.addColorStop(0, `rgba(${s.rgb},${(s.a * 0.32).toFixed(3)})`);
         glow.addColorStop(1, `rgba(${s.rgb},0)`);
@@ -89,9 +91,44 @@ export function initSky({ reduced }: { reduced: boolean }) {
       g.beginPath(); g.arc(x, y, s.r, 0, Math.PI * 2); g.fill();
     }
   };
+  const draw = () => {
+    // The layer is 100lvh tall, so a phone's address bar coming and going doesn't resize it.
+    const cw = sky.clientWidth, ch = sky.clientHeight;
+    if (!cw || !ch || size === `${cw}x${ch}`) return;
+    size = `${cw}x${ch}`; w = cw; h = ch;
+    // 1.5x is plenty for dots this small, and a full-window canvas at 2x is a 20 MB texture.
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    n = Math.min(pool.length, Math.round((w * h) / STAR_AREA));
+    paint();
+  };
   draw();
   new ResizeObserver(draw).observe(sky);
   if (reduced) return;
+
+  // Warp: a fast scroll stretches the stars into short streaks, as if the page were flying past
+  // them, and they settle back to points when it stops. The canvas is only redrawn while the
+  // page is moving; at rest it is the one still picture.
+  let lastY = window.scrollY, lastT = 0, lastScroll = 0, vel = 0, warping = false;
+  const warp = (t: number) => {
+    const y = window.scrollY;
+    const v = (y - lastY) / Math.max(8, t - lastT);
+    lastY = y; lastT = t;
+    vel += (v - vel) * 0.3;
+    // Settled: slow enough, and no scroll for a moment (the first frame after a scroll event
+    // reads no movement yet, so speed alone would stop it at once).
+    if (Math.abs(vel) < 0.03 && t - lastScroll > 150) { vel = 0; warping = false; paint(); return; }
+    paint(Math.max(-24, Math.min(24, vel * 7)));
+    requestAnimationFrame(warp);
+  };
+  window.addEventListener('scroll', () => {
+    lastScroll = performance.now();
+    if (warping || document.hidden) return;
+    warping = true;
+    lastY = window.scrollY; lastT = lastScroll;
+    requestAnimationFrame(warp);
+  }, { passive: true });
 
   // A meteor falls right and down at about 35°, as on the old site, its bright head first and
   // the tail fading behind. It brightens as it goes and then is gone.

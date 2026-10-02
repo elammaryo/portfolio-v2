@@ -319,14 +319,26 @@ function tick() {
 tick();
 setInterval(tick, 20000);
 
-/* ---------- Nav behaviour ---------- */
+/* ---------- Nav behaviour, and the back-to-top button ---------- */
 const nav = $('#nav');
+const toTop = $<HTMLButtonElement>('#toTop');
+const toTopRing = $('#toTopRing');
 let lastY = 0;
 const onScroll = (y: number) => {
   nav.classList.toggle('is-scrolled', y > 40);
   nav.classList.toggle('is-hidden', y > lastY && y > 400);
   lastY = y;
+  // Once the hero is behind you; the ring is how far down the page you are.
+  toTop.classList.toggle('is-on', y > window.innerHeight * 1.1);
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  toTopRing.style.strokeDashoffset = String(125.7 * (1 - (max > 0 ? Math.min(1, y / max) : 0)));
 };
+toTop.addEventListener('click', () => {
+  if (lenis) lenis.scrollTo(0, { duration: 1.6, force: true });
+  else window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+  // The button is about to disappear, so keyboard focus goes to the top of the page with it.
+  $<HTMLElement>('.nav__mark').focus({ preventScroll: true });
+});
 if (lenis) lenis.on('scroll', (l: Lenis) => onScroll(l.scroll));
 else window.addEventListener('scroll', () => onScroll(window.scrollY), { passive: true });
 
