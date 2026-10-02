@@ -1,10 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- OE: a violet O and an ember E, the site's two accents on its 3 AM ink. Strokes are
-       heavy and the letters sit a hair apart, so they still read as two at 16px. -->
+  <!-- The ringed planet from the first site (elammaryo/cosmic-portfolio), kept as it was:
+       the hero's planet is back, so the tab shows it too. -->
   <defs>
-    <radialGradient id="bg" cx="28%" cy="18%" r="100%"><stop offset="0" stop-color="#231a44"/><stop offset=".6" stop-color="#0d0b18"/><stop offset="1" stop-color="#07070c"/></radialGradient>
+    <radialGradient id="planet" cx="30%" cy="22%" r="85%">
+      <stop stop-color="#e1d9ff"/>
+      <stop offset=".4" stop-color="#a08aff"/>
+      <stop offset="1" stop-color="#5941bb"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0">
+      <stop stop-color="#77e4dc"/>
+      <stop offset=".6" stop-color="#d5c6ff"/>
+      <stop offset="1" stop-color="#ffc98b"/>
+    </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="15" fill="url(#bg)"/>
-  <circle cx="23" cy="32" r="10.6" fill="none" stroke="#b3a5ff" stroke-width="6.2"/>
-  <path d="M53.5 21.2H41v21.6h12.5M41 32h10.5" fill="none" stroke="#ffb36b" stroke-width="6.2" stroke-linejoin="round"/>
+  <rect width="64" height="64" rx="16" fill="#101024"/>
+  <g transform="rotate(-30 32 32)">
+    <ellipse cx="32" cy="32" rx="26" ry="10" fill="none" stroke="#7667aa" stroke-width="3"/>
+    <circle cx="32" cy="32" r="17" fill="url(#planet)"/>
+    <path d="M6 32a26 10 0 0 0 52 0" fill="none" stroke="url(#ring)" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+  <circle cx="49" cy="12" r="3" fill="#ffce93"/>
 </svg>

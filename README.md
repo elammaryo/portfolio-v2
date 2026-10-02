@@ -325,12 +325,14 @@ on the right. It is a screenshot of the real planet (`createPlanet` with `formed
 `reduced`, so one still frame) on a 1200×630 page, saved as a JPEG; redo it when the hero
 changes, so a shared link looks like the page it opens.
 
-The icon is an OE monogram: a violet O and an ember E, the site's two accents, on its dark
-ink. Omer picked it from seven ideas (a code mug, a coffee bean, a 3 AM moon, a prompt,
-particles, the plus). `favicon.svg` is the source; `favicon.ico` (16, 32, 48) is for
-browsers without SVG icons, and `apple-touch-icon.png` (180, square, full-bleed) is for iOS,
-which rounds the corners itself. The strokes are heavy and the letters sit a hair apart, so
-it still reads as two letters at 16 px.
+The icon is the first site's ringed planet, unchanged (`elammaryo/cosmic-portfolio`'s
+`favicon.svg`, the one omerelammary.com shows). Omer took it for this site's icon on
+2026-10-02, once the hero's planet was back; it replaced an OE monogram (a violet O and an
+ember E) he had picked on 2026-09-30. `favicon.svg` is the source. The rest are rendered
+from it in a browser, each at its own size rather than shrunk from a big one: `favicon.ico`
+(16, 32, 48) for browsers without SVG icons, `icon-192.png` and `icon-512.png` for the
+manifest, and `apple-touch-icon.png` (180), the same art full-bleed, because iOS rounds the
+corners itself.
 
 ## Commit data
 `src/data/commits.json` is generated from local clones of your repos:
