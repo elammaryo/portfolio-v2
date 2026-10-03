@@ -1,10 +1,17 @@
 // GlazeBot: Omer's hype man, back from the old site. The model, its instructions and the
 // fact sheet all live on the server (github.com/elammaryo/ai-chatbot, deployed on Render);
-// the browser only ever sends the conversation. The server's CORS list decides which sites
-// may talk to it, so anywhere else (a preview, localhost) the bot says it's on mute instead
-// of failing mysteriously.
+// the browser only ever sends the conversation. It only talks from Omer's own domains, so
+// anywhere else (a preview, localhost) the bot says it's on mute instead of failing
+// mysteriously.
+//
+// It asks through the site's own /api/glazebot, which vercel.json proxies to the bot. Called
+// directly, the bot's CORS list decides which sites get an answer, and the rebuilt site went
+// live on an address that list didn't name: the browser dropped every reply, and the widget
+// could only say the server didn't answer. Same-origin, there is nothing for the browser to
+// check. A host without the proxy answers 404, and then the bot is called directly.
 
 const API = 'https://ai-chatbot-kcyl.onrender.com';
+const PROXY = '/api/glazebot';
 const LIVE = /(^|\.)omerelammary\.(com|netlify\.app)$/.test(location.hostname);
 const WELCOME = 'Hey, I’m GlazeBot, Omer’s hype man. I’m biased on purpose, but I only use real facts. Ask me anything about his work.';
 const SUGGEST = ['Glaze Omer 🔥', 'What’s GameDay?', 'Is he any good?', 'What does he do at CMiC?', 'Why cricket and soccer?'];
@@ -130,14 +137,19 @@ export function initGlazeBot(reduced: boolean) {
     try {
       const ctrl = new AbortController();
       const kill = window.setTimeout(() => ctrl.abort(), 70000);
-      const res = await fetch(`${API}/chatbot/openaiChatResponse`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
-        body: JSON.stringify({ messages: history.slice(-24) }),
-      });
+      const body = JSON.stringify({ messages: history.slice(-24) });
+      const call = (url: string) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal, body });
+      let res = await call(PROXY);
+      if (res.status === 404 || res.status === 405) res = await call(`${API}/chatbot/openaiChatResponse`);
       window.clearTimeout(kill);
       const data = (await res.json().catch(() => ({}))) as { content?: string; error?: string };
       reply = res.ok && data.content ? data.content.trim() : '';
-    } catch { /* network, CORS or timeout: handled below */ }
+      // The reason, for whoever opens the console: the chat itself only ever says it lost the thread.
+      if (!reply) console.warn(`GlazeBot: no reply (HTTP ${res.status}${data.error ? `: ${data.error}` : ''})`);
+    } catch (e) {
+      // Network, CORS or the 70 s timeout.
+      console.warn('GlazeBot: no reply', e);
+    }
     window.clearTimeout(slow); window.clearTimeout(slower);
     status.textContent = 'Omer’s hype man · biased on purpose';
     typing.remove();

@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/glazebot", "destination": "https://ai-chatbot-kcyl.onrender.com/chatbot/openaiChatResponse" }
+  ]
+}

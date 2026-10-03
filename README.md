@@ -242,10 +242,22 @@ each kick.
 
 ## GlazeBot (`src/glazebot.ts`)
 The chat widget talks to the bot at `ai-chatbot-kcyl.onrender.com` (repo
-`elammaryo/ai-chatbot`, which owns the model, instructions and fact sheet). The server's CORS
-list decides which sites may call it, so on any other host (a preview, localhost) the widget
-says it's on mute rather than failing. Render's free tier sleeps: the widget pings the server
-when someone hovers the launcher, and says so if a cold start is slow.
+`elammaryo/ai-chatbot`, which owns the model, instructions and fact sheet). It only talks from
+Omer's own domains (omerelammary.com and its subdomains, `LIVE` in the script), so on any other
+host (a preview, localhost) it says it's on mute rather than failing. Render's free tier
+sleeps: the widget pings the server when someone hovers the launcher, and says so if a cold
+start is slow.
+
+It asks through the site's own `/api/glazebot`, which `vercel.json` rewrites to the bot, so the
+browser makes a same-origin call and the bot's CORS list never comes into it. When the rebuilt
+site first went live (2026-10-03) every chat came back "the server didn't answer": the site was
+being served from an omerelammary.com address other than the bare domain or www, and the CORS
+list named only exact addresses (the bare domain among them), so the browser would drop every
+reply while the server saw nothing wrong. Vercel
+waits up to two minutes for the bot to start answering, which covers a cold start. A host
+without the rewrite answers 404, and then the widget calls the bot directly (where the CORS
+list applies again). When there's no reply, the console says why (`GlazeBot: no reply`, with
+the HTTP status and the server's error).
 
 The launcher is the old site's: a glass tile with Lucide's bot icon, a pink dot, and a
 "GlazeBot AI" label that slides out on hover. It stays hidden through the hero and its flight
