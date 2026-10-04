@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.omerelammary.com" }],
+      "destination": "https://omerelammary.com/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/api/glazebot", "destination": "https://ai-chatbot-kcyl.onrender.com/chatbot/openaiChatResponse" }
   ]

@@ -326,9 +326,21 @@ The page is built to be found by his name first, then by what he does.
   previews; `og.jpg` is the share image. `site.webmanifest` names the site and its icons.
 - Lighthouse (2026-09-30): SEO 100, Accessibility 100, Best Practices 100. The one failure
   before was the missing `robots.txt`.
-- Off the page, and up to Omer: verify the domain in Google Search Console and submit the
-  sitemap; point the website field on GitHub, LinkedIn and Instagram at omerelammary.com; and
-  have the host redirect `www` to the bare domain, which the canonical tag names.
+- Google Search Console was set up on the first site, verified by a
+  `google-site-verification` meta tag. Google re-checks that tag, so `index.html` carries the
+  same one: take it out and the property goes unverified. The site took over the domain on
+  2026-10-03 at the same address, so what the old page had earned in search stays with it,
+  but Google kept showing the old title and icon until it recrawled. To hurry that along,
+  inspect `https://omerelammary.com/` in Search Console and request indexing, and resubmit the
+  sitemap. The title follows within days; the favicon is fetched on its own schedule and can
+  take weeks. Google wants a favicon a multiple of 48px square (or an SVG), hence the
+  192px PNG link next to the SVG. The first site's URLs carry over: it was one page, and its
+  resume lived at the same `/documents/Omer_Elammary_Resume.pdf`.
+- `www.omerelammary.com` served the whole site too, a second copy of the page; `vercel.json`
+  now redirects it (308) to the bare domain, which the canonical tag names, so search engines
+  see one address.
+- Off the page, and up to Omer: point the website field on GitHub, LinkedIn and Instagram at
+  omerelammary.com.
 
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
