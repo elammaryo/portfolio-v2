@@ -336,9 +336,11 @@ The page is built to be found by his name first, then by what he does.
   take weeks. Google wants a favicon a multiple of 48px square (or an SVG), hence the
   192px PNG link next to the SVG. The first site's URLs carry over: it was one page, and its
   resume lived at the same `/documents/Omer_Elammary_Resume.pdf`.
-- `www.omerelammary.com` served the whole site too, a second copy of the page; `vercel.json`
-  now redirects it (308) to the bare domain, which the canonical tag names, so search engines
-  see one address.
+- `www.omerelammary.com` serves the whole site too. The canonical tag names the bare domain,
+  so search engines fold the two together; a redirect, if wanted, belongs in Vercel's domain
+  settings (Domains, www, redirect to omerelammary.com). Not in `vercel.json`: a host-matched
+  redirect there (2026-10-03) put every path except `/` into a redirect loop, so the page
+  loaded with no styles or scripts, until it was taken out the same night.
 - Off the page, and up to Omer: point the website field on GitHub, LinkedIn and Instagram at
   omerelammary.com.
 
