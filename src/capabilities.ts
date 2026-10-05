@@ -64,7 +64,7 @@ const ROWS: Row[] = [
     budget: 'Realtime refreshes the dashboard the moment a transaction lands.',
   } },
   { id: 'ai', name: 'AI & LLMs', cells: {
-    athena: 'Claude with 36 tools. Chat cost fell from about 9¢ to 0.4¢ an exchange, measured in production.',
+    athena: 'Claude with 36 tools. Cost per exchange fell from about 9¢ to 0.4¢, measured in production.',
     glazebot: 'A guide to my work, grounded in a profile I approved and told to decline anything it can’t back up.',
     skinopathy: 'The AI skin assessment flow: questions in, categorised results from the model out.',
   } },
