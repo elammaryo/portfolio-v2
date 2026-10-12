@@ -1,3 +1,4 @@
+import { inject } from '@vercel/analytics';
 import '@fontsource/syne/latin-600.css';
 import '@fontsource/syne/latin-700.css';
 import '@fontsource/syne/latin-800.css';
@@ -27,6 +28,9 @@ import { initGameOver } from './eggs/gameover';
 import { initSky } from './sky';
 import { drawClock, drawHeatmap, drawStack, fillTicker } from './charts';
 import { player } from './audio';
+
+// Initialize Vercel Web Analytics
+inject();
 
 gsap.registerPlugin(ScrollTrigger);
 // ?slow=N slows every timeline down N times (used to inspect the intro frame by frame).
