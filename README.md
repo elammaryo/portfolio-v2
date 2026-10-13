@@ -344,6 +344,14 @@ The page is built to be found by his name first, then by what he does.
 - Off the page, and up to Omer: point the website field on GitHub, LinkedIn and Instagram at
   omerelammary.com.
 
+## Analytics
+Vercel Web Analytics, added on 2026-10-12 through Vercel's own pull request (#1): `main.ts`
+calls `inject()` from `@vercel/analytics` before anything else runs, and the script it loads,
+`/_vercel/insights/script.js`, is served by Vercel because Web Analytics is switched on for the
+project. It counts page views and visitors on production only, with no cookies. The numbers are
+in the Vercel dashboard (portfolio-v2, Analytics). Anywhere else (a local preview, the published
+artifact) the script isn't there, and the package says so in the console instead of failing.
+
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
 Twitter tags in `index.html`: his name and the old site's line on the left, the hero's planet
