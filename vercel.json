@@ -1,5 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/glazebot", "destination": "https://ai-chatbot-kcyl.onrender.com/chatbot/openaiChatResponse" }
+    { "source": "/api/glazebot", "destination": "https://ai-chatbot-kcyl.onrender.com/chatbot/openaiChatResponse" },
+    { "source": "/orbit/static/:path(.*)", "destination": "https://us-assets.i.posthog.com/static/:path" },
+    { "source": "/orbit/array/:path(.*)", "destination": "https://us-assets.i.posthog.com/array/:path" },
+    { "source": "/orbit/:path(.*)", "destination": "https://us.i.posthog.com/:path" }
   ]
 }

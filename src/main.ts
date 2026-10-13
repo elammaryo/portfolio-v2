@@ -28,9 +28,12 @@ import { initGameOver } from './eggs/gameover';
 import { initSky } from './sky';
 import { drawClock, drawHeatmap, drawStack, fillTicker } from './charts';
 import { player } from './audio';
+import { initPostHog } from './posthog';
 
-// Initialize Vercel Web Analytics
+// Analytics: Vercel Web Analytics for the basics, PostHog for the detail (posthog.ts; it waits
+// for the page to go idle).
 inject();
+initPostHog();
 
 gsap.registerPlugin(ScrollTrigger);
 // ?slow=N slows every timeline down N times (used to inspect the intro frame by frame).

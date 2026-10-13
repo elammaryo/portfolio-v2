@@ -345,12 +345,26 @@ The page is built to be found by his name first, then by what he does.
   omerelammary.com.
 
 ## Analytics
-Vercel Web Analytics, added on 2026-10-12 through Vercel's own pull request (#1): `main.ts`
-calls `inject()` from `@vercel/analytics` before anything else runs, and the script it loads,
-`/_vercel/insights/script.js`, is served by Vercel because Web Analytics is switched on for the
-project. It counts page views and visitors on production only, with no cookies. The numbers are
-in the Vercel dashboard (portfolio-v2, Analytics). Anywhere else (a local preview, the published
-artifact) the script isn't there, and the package says so in the console instead of failing.
+Two, for different depths. Both only count production.
+- Vercel Web Analytics, added on 2026-10-12 through Vercel's own pull request (#1): `main.ts`
+  calls `inject()` from `@vercel/analytics` before anything else runs, and the script it loads,
+  `/_vercel/insights/script.js`, is served by Vercel because Web Analytics is switched on for the
+  project. Page views, visitors, countries, devices and referrers, with no cookies. The numbers
+  are in the Vercel dashboard (portfolio-v2, Analytics).
+- PostHog (`src/posthog.ts`), added on 2026-10-13 because Omer wanted more than that: city-level
+  location, device and browser, referrers, and recordings of how people move through the page,
+  on PostHog's free tier (1M events and 5K recordings a month). The library is its own chunk,
+  loaded once the page is idle, and only on omerelammary.com (not previews, localhost or the
+  published artifact). Visitors stay anonymous (`person_profiles: 'identified_only'`, and the
+  site never identifies anyone); inputs, GlazeBot's included, are masked in recordings by
+  PostHog's default.
+  Everything goes through `/orbit`, which `vercel.json` rewrites to PostHog's US servers (its
+  assets at `/orbit/static` and `/orbit/array` first, then everything else), so the browser only
+  talks to omerelammary.com and blockers that filter by domain let it through. The path is
+  deliberately not `/analytics`, `/tracking` or PostHog's documented `/ingest`, which are on
+  blocklists. PostHog drops automated browsers (`navigator.webdriver`), so a test with Playwright
+  sees no events unless it hides that. If the PostHog project is ever moved to the EU region,
+  the three rewrites and `ui_host` change to the `eu` hosts.
 
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
