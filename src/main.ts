@@ -29,10 +29,11 @@ import { initSky } from './sky';
 import { drawClock, drawHeatmap, drawStack, fillTicker } from './charts';
 import { player } from './audio';
 import { initPostHog } from './posthog';
+import { isCounted } from './visitor';
 
 // Analytics: Vercel Web Analytics for the basics, PostHog for the detail (posthog.ts; it waits
-// for the page to go idle).
-inject();
+// for the page to go idle). Neither counts a browser Omer has marked as his own (visitor.ts).
+inject({ beforeSend: (event) => (isCounted() ? event : null) });
 initPostHog();
 
 gsap.registerPlugin(ScrollTrigger);

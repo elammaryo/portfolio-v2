@@ -17,6 +17,12 @@
 // a chat bubble, which is text rather than an input, so glazebot.ts marks it `ph-mask` too.
 // The planet, the sky and the GameOver wall are canvases, which recordings don't capture: in
 // a replay those areas are empty, and that isn't a fault.
+//
+// A returning browser is known by the ID the site's server gave it (visitor.ts, api/hello.ts),
+// not one PostHog keeps for itself, which Safari would wipe after a week away. Browsers Omer
+// has marked as his own (?me) don't load PostHog at all.
+
+import { isCounted, visitorId } from './visitor';
 
 /** The project's public token: it can send events, not read them, so it's meant to ship. */
 const KEY = 'phc_o6WVA5vK8SKsh4QiECzXDIyBJPb4xwKBZBFv6jLC8s9';
@@ -24,22 +30,26 @@ const LIVE = /(^|\.)omerelammary\.com$/.test(location.hostname);
 
 export function initPostHog() {
   if (!KEY || !LIVE) return;
-  const start = () =>
-    import('posthog-js')
-      .then(({ default: posthog }) =>
-        posthog.init(KEY, {
-          api_host: '/orbit',
-          ui_host: 'https://us.posthog.com',
-          defaults: '2026-08-30',
-          // Visitors stay anonymous: no person profiles unless someone is identified, which
-          // this site never does.
-          person_profiles: 'identified_only',
-          // The site asks visitors nothing. Without this the SDK fetches its 100 KB survey
-          // script on every visit even when the project has no surveys.
-          disable_surveys: true,
-        }),
-      )
-      .catch(() => undefined);
-  if ('requestIdleCallback' in window) requestIdleCallback(() => void start(), { timeout: 4000 });
-  else setTimeout(() => void start(), 2000);
+  const start = async () => {
+    // First, so ?me is recorded even though this visit then stops here.
+    const id = await visitorId();
+    if (!isCounted()) return;
+    const { default: posthog } = await import('posthog-js');
+    posthog.init(KEY, {
+      api_host: '/orbit',
+      ui_host: 'https://us.posthog.com',
+      defaults: '2026-08-30',
+      // Every browser gets a profile in PostHog's People tab, listing all its visits and their
+      // recordings, which is how Omer sees someone coming back. Still anonymous: the site never
+      // learns or sends a name. (It was 'identified_only', no profiles, until 2026-10-13.)
+      person_profiles: 'always',
+      ...(id ? { bootstrap: { distinctID: id } } : {}),
+      // The site asks visitors nothing. Without this the SDK fetches its 100 KB survey
+      // script on every visit even when the project has no surveys.
+      disable_surveys: true,
+    });
+  };
+  const go = () => void start().catch(() => undefined);
+  if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 4000 });
+  else setTimeout(go, 2000);
 }

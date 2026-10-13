@@ -358,8 +358,10 @@ Two, for different depths. Both only count production.
   that project's public one, which can send events but not read them. Recordings are switched on
   in the project's settings (Session replay), and omerelammary.com is its authorized URL. The
   library is its own chunk, loaded once the page is idle, and only on omerelammary.com (not
-  previews, localhost or the published artifact). Visitors stay anonymous
-  (`person_profiles: 'identified_only'`, and the site never identifies anyone). Recordings mask
+  previews, localhost or the published artifact). Every browser gets an anonymous profile in
+  PostHog's People tab (`person_profiles: 'always'`, since 2026-10-13; it was
+  `'identified_only'`, which keeps no profiles), listing its visits and their recordings. The
+  site never learns or sends a name. Recordings mask
   what visitors type to GlazeBot: the input by PostHog's default, and the sent message by the
   `ph-mask` class on their bubbles (`glazebot.ts`). The planet, the sky and the GameOver wall are
   canvases, which recordings leave empty.
@@ -374,6 +376,40 @@ Two, for different depths. Both only count production.
   about 1 MB before compression). At a portfolio's traffic that is a small share of what Vercel
   includes; if it ever isn't, PostHog's managed reverse proxy (free, on a subdomain) replaces it.
   `disable_surveys` stops the SDK fetching its survey script on every visit; the site runs none.
+
+### Returning visitors
+Omer asked on 2026-10-13 to see when the same visitor keeps coming back over days or weeks. A
+browser doesn't give a website any device ID, so a returning visitor is a returning browser,
+known by an ID in a cookie. PostHog's own ID doesn't last on Safari: Safari deletes everything a
+page's script stores, cookies included, after seven days of Safari use without the visitor
+interacting with the site, so an iPhone back after two weeks looked new. A cookie set in an
+HTTP response from the site's own server isn't script storage, and Safari keeps it as long as it
+asks. So the ID comes from the server:
+
+- `api/hello.js` is a Vercel Function at `/api/hello`. It sets `orbit_id`, a random UUID, for
+  400 days (the longest browsers allow) on omerelammary.com and www, keeps an ID the browser
+  already has, and replaces anything that isn't a UUID. It's plain JavaScript checked with
+  `@ts-check`, because the project's `tsconfig.json` is Vite's and isn't set up for compiling a
+  function.
+- `src/visitor.ts` reads the cookie, and calls `/api/hello` only when there isn't one (a
+  browser's first visit), on idle like PostHog itself. `posthog.ts` passes the ID to PostHog as
+  `bootstrap.distinctID`. If the function can't be reached, PostHog makes an ID of its own.
+- Fingerprinting (recognising a device from its screen, GPU, fonts and IP) was the alternative,
+  and was ruled out: Safari 26 presents identical, simplified device details to every site, and
+  it is covert tracking.
+- Still per browser, not per person: a phone and a laptop are two visitors, as are Safari and
+  Chrome on one phone, a private window, or the browser inside the LinkedIn or Instagram app.
+  Clearing site data starts a browser over.
+
+Omer's own browsers stay out of both analytics. `omerelammary.com/?me`, opened once on each
+browser, has the server set `orbit_me` for 400 days; on that browser PostHog never loads and
+Vercel Analytics drops every event (`beforeSend` in `main.ts`). `/?notme` undoes it. Either
+flag is taken out of the address bar as the page loads, so a link copied from there can't switch
+anyone else off, and a note at the bottom of the screen confirms the switch for four seconds
+(`.visit-note`). `node scripts/test-hello.mjs` tests the function on its own. On 2026-10-13 the
+whole flow was also run in a browser against the local build, with the real function behind
+`/api/hello`: the first visit asked the server and later ones didn't, PostHog's events carried the
+server's ID with profiles on, and a marked browser sent nothing to either analytics.
 
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
