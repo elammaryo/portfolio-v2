@@ -103,6 +103,9 @@ export function initGlazeBot(reduced: boolean) {
   function bubble(role: Msg['role'], text: string) {
     const p = document.createElement('p');
     p.className = `gb-msg gb-msg--${role === 'user' ? 'me' : 'bot'}`;
+    // What a visitor writes stays theirs. PostHog's recordings (posthog.ts) mask the input by
+    // default; `ph-mask` masks the message once it's sent and shown here as text.
+    if (role === 'user') p.classList.add('ph-mask');
     p.textContent = text;
     feed.append(p);
     feed.scrollTop = feed.scrollHeight;

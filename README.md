@@ -353,18 +353,27 @@ Two, for different depths. Both only count production.
   are in the Vercel dashboard (portfolio-v2, Analytics).
 - PostHog (`src/posthog.ts`), added on 2026-10-13 because Omer wanted more than that: city-level
   location, device and browser, referrers, and recordings of how people move through the page,
-  on PostHog's free tier (1M events and 5K recordings a month). The library is its own chunk,
-  loaded once the page is idle, and only on omerelammary.com (not previews, localhost or the
-  published artifact). Visitors stay anonymous (`person_profiles: 'identified_only'`, and the
-  site never identifies anyone); inputs, GlazeBot's included, are masked in recordings by
-  PostHog's default.
+  on PostHog's free tier (1M events and 5K recordings a month). It reports to Omer's "Default
+  project" on PostHog's US cloud (us.posthog.com, project 150186); the token in `posthog.ts` is
+  that project's public one, which can send events but not read them. Recordings are switched on
+  in the project's settings (Session replay), and omerelammary.com is its authorized URL. The
+  library is its own chunk, loaded once the page is idle, and only on omerelammary.com (not
+  previews, localhost or the published artifact). Visitors stay anonymous
+  (`person_profiles: 'identified_only'`, and the site never identifies anyone). Recordings mask
+  what visitors type to GlazeBot: the input by PostHog's default, and the sent message by the
+  `ph-mask` class on their bubbles (`glazebot.ts`). The planet, the sky and the GameOver wall are
+  canvases, which recordings leave empty.
   Everything goes through `/orbit`, which `vercel.json` rewrites to PostHog's US servers (its
   assets at `/orbit/static` and `/orbit/array` first, then everything else), so the browser only
   talks to omerelammary.com and blockers that filter by domain let it through. The path is
   deliberately not `/analytics`, `/tracking` or PostHog's documented `/ingest`, which are on
   blocklists. PostHog drops automated browsers (`navigator.webdriver`), so a test with Playwright
   sees no events unless it hides that. If the PostHog project is ever moved to the EU region,
-  the three rewrites and `ui_host` change to the `eu` hosts.
+  the three rewrites and `ui_host` change to the `eu` hosts. The proxy's traffic counts as
+  Vercel data transfer, and recordings are most of it (a scroll through the whole page records
+  about 1 MB before compression). At a portfolio's traffic that is a small share of what Vercel
+  includes; if it ever isn't, PostHog's managed reverse proxy (free, on a subdomain) replaces it.
+  `disable_surveys` stops the SDK fetching its survey script on every visit; the site runs none.
 
 ## Sharing
 `public/og.jpg` is the link-preview image (1200×630), referenced by the Open Graph and
